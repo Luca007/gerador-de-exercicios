@@ -249,7 +249,15 @@ function removeExistingSections() {
 
   const existingAdmin = document.getElementById('admin-section');
   if (existingAdmin) existingAdmin.remove();
+
+  const existingManage = document.getElementById('manage-section');
+  if (existingManage) existingManage.remove();
+
+  const existingEdit = document.getElementById('edit-section');
+  if (existingEdit) existingEdit.remove();
 }
+
+
 
 // Função para criar o formulário de login
 function createLoginForm() {
@@ -374,31 +382,7 @@ function createAdminInterface() {
     { label: 'Categoria:', id: 'categoria', type: 'select', options: ['Todos', 'Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'], required: true },
     { label: 'Nível:', id: 'nivel', type: 'select', options: ['todos', 'iniciante', 'intermediario', 'avancado'], required: true },
   ];
-  
-  // Função para atualizar a obrigatoriedade dos campos
-  function updateFieldRequirements() {
-    const tempoVal = $('#tempo-admin').val().trim();
-    const repeticoesInput = document.getElementById('repeticoes');
-    const seriesInput = document.getElementById('series');
-
-    if (tempoVal === '') {
-      // Tempo não preenchido, séries e repetições são obrigatórios
-      repeticoesInput.required = true;
-      seriesInput.required = true;
-      $('#repeticoes').closest('.form-group').find('label').html('Repetições: *');
-      $('#series').closest('.form-group').find('label').html('Séries: *');
-    } else {
-      // Tempo preenchido, séries e repetições não são obrigatórios
-      repeticoesInput.required = false;
-      seriesInput.required = false;
-      $('#repeticoes').closest('.form-group').find('label').html('Repetições:');
-      $('#series').closest('.form-group').find('label').html('Séries:');
-    }
-  }
-
-// Adicionar eventos aos campos
-$('#tempo-admin').on('input', updateFieldRequirements);
-  
+    
   fields.forEach(field => {
     const formGroup = document.createElement('div');
     formGroup.className = 'form-group';
@@ -463,6 +447,36 @@ $('#tempo-admin').on('input', updateFieldRequirements);
 
   // Aplicar máscaras aos campos após adicionar ao DOM
   applyInputMasks();
+
+  // Função para atualizar a obrigatoriedade dos campos
+  function updateFieldRequirements() {
+    const tempoVal = $('#tempo-admin').val().trim();
+    const repeticoesInput = document.getElementById('repeticoes');
+    const seriesInput = document.getElementById('series');
+
+    if (tempoVal === '') {
+      // Tempo não preenchido, séries e repetições são obrigatórios
+      repeticoesInput.required = true;
+      seriesInput.required = true;
+      $('#repeticoes').closest('.form-group').find('label').html('Repetições: *');
+      $('#series').closest('.form-group').find('label').html('Séries: *');
+    } else {
+      // Tempo preenchido, séries e repetições não são obrigatórios
+      repeticoesInput.required = false;
+      seriesInput.required = false;
+      $('#repeticoes').closest('.form-group').find('label').html('Repetições:');
+      $('#series').closest('.form-group').find('label').html('Séries:');
+    }
+  }
+
+  // Adicionar eventos aos campos
+  $('#tempo-admin').on('input', updateFieldRequirements);
+
+  // Atualizar a obrigatoriedade inicial
+  updateFieldRequirements();
+  
+  // Adicionar botão para gerenciar exercícios
+  adicionarBotaoGerenciarExercicios();
 
   // Adicionar eventos
   form.addEventListener('submit', async (e) => {
@@ -585,3 +599,384 @@ auth.onAuthStateChanged((user) => {
     // A interface de login será gerada ao clicar no botão
   }
 });
+
+
+// Function to create the exercise management interface
+function criarGerenciamentoExercicios() {
+  // Remover seções existentes
+  removeExistingSections();
+
+  // Criar contêiner
+  const manageSection = document.createElement('div');
+  manageSection.id = 'manage-section';
+  manageSection.className = 'container mt-5';
+
+  const h2 = document.createElement('h2');
+  h2.innerText = 'Gerenciar Exercícios';
+  h2.className = 'text-center mb-4';
+
+  manageSection.appendChild(h2);
+
+  // Criar um indicador de carregamento
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'loading-exercises';
+  loadingDiv.className = 'text-center';
+  loadingDiv.innerText = 'Carregando exercícios...';
+  manageSection.appendChild(loadingDiv);
+
+  // Contêiner para exercícios
+  const exercisesContainer = document.createElement('div');
+  exercisesContainer.id = 'exercises-container';
+  manageSection.appendChild(exercisesContainer);
+
+  // Adicionar ao body
+  document.body.appendChild(manageSection);
+
+  // Buscar e exibir exercícios
+  buscarEExibirExercicios();
+}
+
+function buscarEExibirExercicios() {
+  const exercisesContainer = document.getElementById('exercises-container');
+  const loadingDiv = document.getElementById('loading-exercises');
+
+  // Limpar conteúdo anterior
+  exercisesContainer.innerHTML = '';
+
+  // Buscar exercícios do Firestore
+  db.collection('exercicios').get()
+    .then((querySnapshot) => {
+      const exercisesByCategory = {};
+
+      querySnapshot.forEach((doc) => {
+        const exercise = doc.data();
+        exercise.id = doc.id; // Armazenar o ID do documento
+        const category = exercise.categoria || 'Sem Categoria';
+
+        if (!exercisesByCategory[category]) {
+          exercisesByCategory[category] = [];
+        }
+        exercisesByCategory[category].push(exercise);
+      });
+
+      // Remover indicador de carregamento
+      loadingDiv.style.display = 'none';
+
+      // Exibir exercícios agrupados por categoria
+      for (const category in exercisesByCategory) {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category-section';
+
+        const categoryTitle = document.createElement('h3');
+        categoryTitle.innerText = `Categoria: ${category}`;
+        categoryDiv.appendChild(categoryTitle);
+
+        const table = document.createElement('table');
+        table.className = 'table table-bordered';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        const headers = ['Nome', 'Explicação', 'Impulso', 'Repetições', 'Séries', 'Tempo', 'Nível', 'Categoria Etária', 'Ações'];
+        headers.forEach((headerText) => {
+          const th = document.createElement('th');
+          th.innerText = headerText;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        exercisesByCategory[category].forEach((exercise) => {
+          const row = document.createElement('tr');
+        
+          // Nome
+          const nameCell = document.createElement('td');
+          nameCell.innerText = exercise.nome || '';
+          row.appendChild(nameCell);
+        
+          // Explicação
+          const explanationCell = document.createElement('td');
+          explanationCell.innerText = exercise.explicacao || '';
+          row.appendChild(explanationCell);
+        
+          // Impulso
+          const impulsoCell = document.createElement('td');
+          impulsoCell.innerText = exercise.impulso || '';
+          row.appendChild(impulsoCell);
+        
+          // Repetições
+          const repeticoesCell = document.createElement('td');
+          repeticoesCell.innerText = exercise.repeticoes || '';
+          row.appendChild(repeticoesCell);
+        
+          // Séries
+          const seriesCell = document.createElement('td');
+          seriesCell.innerText = exercise.series || '';
+          row.appendChild(seriesCell);
+        
+          // Tempo
+          const tempoCell = document.createElement('td');
+          tempoCell.innerText = exercise.duracao ? `${exercise.duracao} seg` : '';
+          row.appendChild(tempoCell);
+        
+          // Nível
+          const nivelCell = document.createElement('td');
+          nivelCell.innerText = exercise.nivel || '';
+          row.appendChild(nivelCell);
+        
+          // Categoria Etária
+          const ageCell = document.createElement('td');
+          ageCell.innerText = exercise.etaria || '';
+          row.appendChild(ageCell);
+        
+          // Ações
+          const actionsCell = document.createElement('td');
+        
+          // Botão Editar
+          const editButton = document.createElement('button');
+          editButton.className = 'btn btn-primary btn-sm mr-2';
+          editButton.innerText = 'Editar';
+          editButton.addEventListener('click', () => editarExercicio(exercise));
+          actionsCell.appendChild(editButton);
+        
+          // Botão Deletar
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'btn btn-danger btn-sm';
+          deleteButton.innerText = 'Deletar';
+          deleteButton.addEventListener('click', () => deletarExercicio(exercise.id));
+          actionsCell.appendChild(deleteButton);
+        
+          row.appendChild(actionsCell);
+        
+          tbody.appendChild(row);
+        });
+                
+        table.appendChild(tbody);
+        categoryDiv.appendChild(table);
+        exercisesContainer.appendChild(categoryDiv);
+      }
+    })
+    .catch((error) => {
+      console.error('Erro ao obter exercícios:', error);
+      loadingDiv.innerText = 'Erro ao carregar exercícios.';
+    });
+}
+
+function deletarExercicio(exerciseId) {
+  if (confirm('Tem certeza que deseja deletar este exercício?')) {
+    db.collection('exercicios').doc(exerciseId).delete()
+      .then(() => {
+        alert('Exercício deletado com sucesso.');
+        // Atualizar a lista de exercícios
+        buscarEExibirExercicios();
+      })
+      .catch((error) => {
+        console.error('Erro ao deletar exercício:', error);
+        alert('Erro ao deletar exercício.');
+      });
+  }
+}
+
+function editarExercicio(exercise) {
+  // Remover seções existentes
+  removeExistingSections();
+
+  // Criar formulário semelhante ao de adicionar exercício, pré-preenchido com os dados do exercício
+  const editSection = document.createElement('div');
+  editSection.id = 'edit-section';
+  editSection.className = 'container mt-5';
+
+  const h2 = document.createElement('h2');
+  h2.innerText = 'Editar Exercício';
+  h2.className = 'text-center mb-4';
+
+  const form = document.createElement('form');
+  form.id = 'edit-exercise-form';
+  form.className = 'mx-auto';
+  form.style.maxWidth = '500px';
+
+  // Campos para editar exercício
+  const fields = [
+    { label: 'Nome do Exercício:', id: 'nome', type: 'text', required: true, value: exercise.nome },
+    { label: 'Explicação:', id: 'explicacao', type: 'textarea', required: true, value: exercise.explicacao },
+    { label: 'Repetições:', id: 'repeticoes', type: 'text', required: false, value: exercise.repeticoes },
+    { label: 'Séries:', id: 'series', type: 'text', required: false, value: exercise.series },
+    { label: 'Tempo (segundos):', id: 'tempo-admin', type: 'text', required: false, value: exercise.duracao },
+    { label: 'Impulso (Equipamento):', id: 'impulso', type: 'select', options: ['nenhum', 'Lira', 'Solo', 'Tecido', 'Trapézio'], required: true, value: exercise.impulso },
+    { label: 'Categoria Etária:', id: 'categoria-etaria', type: 'select', options: ['todos', 'criança', 'adulto', 'idoso'], required: true, value: exercise.etaria },
+    { label: 'Categoria:', id: 'categoria', type: 'select', options: ['Todos', 'Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'], required: true, value: exercise.categoria },
+    { label: 'Nível:', id: 'nivel', type: 'select', options: ['todos', 'iniciante', 'intermediario', 'avancado'], required: true, value: exercise.nivel },
+  ];
+
+  fields.forEach(field => {
+    const formGroup = document.createElement('div');
+    formGroup.className = 'form-group';
+
+    const label = document.createElement('label');
+    label.htmlFor = field.id;
+    label.innerText = field.label;
+
+    let input;
+    if (field.type === 'textarea') {
+      input = document.createElement('textarea');
+      input.id = field.id;
+      input.required = field.required;
+      input.rows = 3;
+      input.className = 'form-control';
+      input.value = field.value || '';
+    } else if (field.type === 'select') {
+      input = document.createElement('select');
+      input.id = field.id;
+      input.required = field.required;
+      input.className = 'form-control';
+      field.options.forEach(optionValue => {
+        const option = document.createElement('option');
+        option.value = optionValue;
+        option.innerText = optionValue.charAt(0).toUpperCase() + optionValue.slice(1);
+        if (optionValue === field.value) {
+          option.selected = true;
+        }
+        input.appendChild(option);
+      });
+    } else {
+      input = document.createElement('input');
+      input.type = field.type;
+      input.id = field.id;
+      input.required = field.required;
+      input.className = 'form-control';
+      input.value = field.value || '';
+    }
+
+    formGroup.appendChild(label);
+    formGroup.appendChild(input);
+    form.appendChild(formGroup);
+  });
+
+  const saveButton = document.createElement('button');
+  saveButton.type = 'submit';
+  saveButton.innerText = 'Salvar Alterações';
+  saveButton.className = 'btn btn-success btn-block mt-4';
+  form.appendChild(saveButton);
+
+  const adminMessage = document.createElement('div');
+  adminMessage.id = 'admin-message';
+  adminMessage.className = 'mt-3';
+
+  const backButton = document.createElement('button');
+  backButton.type = 'button'; // Evita comportamento de submissão
+  backButton.innerText = 'Voltar';
+  backButton.className = 'btn btn-secondary btn-block mt-3';
+  backButton.addEventListener('click', () => {
+    criarGerenciamentoExercicios();
+  });  
+
+  // Montar a estrutura
+  editSection.appendChild(h2);
+  editSection.appendChild(form);
+  editSection.appendChild(backButton);
+  editSection.appendChild(adminMessage);
+
+  // **Adicionar ao body antes de configurar eventos**
+  document.body.appendChild(editSection);
+
+  // Aplicar máscaras de entrada
+  applyInputMasks();
+
+  // Função para atualizar a obrigatoriedade dos campos
+  function updateFieldRequirements() {
+    const tempoVal = $('#tempo-admin').val().trim();
+    const repeticoesInput = document.getElementById('repeticoes');
+    const seriesInput = document.getElementById('series');
+
+    if (tempoVal === '') {
+      // Tempo não preenchido, séries e repetições são obrigatórios
+      repeticoesInput.required = true;
+      seriesInput.required = true;
+      $('#repeticoes').closest('.form-group').find('label').html('Repetições: *');
+      $('#series').closest('.form-group').find('label').html('Séries: *');
+    } else {
+      // Tempo preenchido, séries e repetições não são obrigatórios
+      repeticoesInput.required = false;
+      seriesInput.required = false;
+      $('#repeticoes').closest('.form-group').find('label').html('Repetições:');
+      $('#series').closest('.form-group').find('label').html('Séries:');
+    }
+  }
+
+  // **Adicionar eventos após elementos existirem no DOM**
+  $('#tempo-admin').on('input', updateFieldRequirements);
+
+  // Atualizar a obrigatoriedade inicial
+  updateFieldRequirements();
+
+  // Manipulador de submissão do formulário
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById('nome').value;
+    const etaria = document.getElementById('categoria-etaria').value;
+    const explicacao = document.getElementById('explicacao').value;
+    const impulso = document.getElementById('impulso').value;
+    const repeticoesVal = document.getElementById('repeticoes').value.replace(/\D/g, '');
+    const seriesVal = document.getElementById('series').value.replace(/\D/g, '');
+    const repeticoes = repeticoesVal ? parseInt(repeticoesVal) : null;
+    const series = seriesVal ? parseInt(seriesVal) : null;
+    const tempoVal = document.getElementById('tempo-admin').value.replace(/\D/g, '');
+    const tempo = tempoVal ? parseInt(tempoVal) : null;
+    const categoria = document.getElementById('categoria').value;
+    const nivel = document.getElementById('nivel').value;
+
+    if (!tempo && (!repeticoes || !series)) {
+      adminMessage.innerHTML = '<div class="alert alert-danger">Por favor, preencha o campo de tempo ou os campos de séries e repetições.</div>';
+      return;
+    }
+
+    try {
+      await db.collection('exercicios').doc(exercise.id).update({
+        nome,
+        etaria,
+        explicacao,
+        impulso,
+        repeticoes,
+        series,
+        duracao: tempo,
+        categoria,
+        nivel
+      });
+      adminMessage.innerHTML = '<div class="alert alert-success">Exercício atualizado com sucesso!</div>';
+
+      // Retornar à lista de exercícios após atualização
+      setTimeout(() => {
+        criarGerenciamentoExercicios();
+      }, 2000);
+
+    } catch (error) {
+      adminMessage.innerHTML = '<div class="alert alert-danger">Erro ao atualizar exercício.</div>';
+      console.error('Erro ao atualizar exercício:', error);
+    }
+
+    // Limpar a mensagem após algum tempo
+    setTimeout(() => {
+      adminMessage.innerHTML = '';
+    }, 3000);
+  });
+}
+
+function adicionarBotaoGerenciarExercicios() {
+  const manageButton = document.createElement('button');
+  manageButton.id = 'manage-exercises-button';
+  manageButton.innerText = 'Gerenciar Exercícios';
+  manageButton.className = 'btn btn-info btn-block mt-3';
+
+  manageButton.addEventListener('click', () => {
+    criarGerenciamentoExercicios();
+  });
+
+  const adminSection = document.getElementById('admin-section');
+  if (adminSection) {
+    adminSection.appendChild(manageButton);
+  }
+}
+
