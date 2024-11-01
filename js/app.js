@@ -67,7 +67,7 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
     const fortalecimentoExercicios = await obterExercicios('Fortalecimento', nivel, categoriaEtaria);
     const alongamentoExercicios = await obterExercicios('Alongamento', nivel, categoriaEtaria);
     const equipamentoExercicios = await obterExercicios('Equipamento', nivel, categoriaEtaria);
-    const cooldownExercicios = await obterExercicios('Cool Down', nivel, categoriaEtaria);
+    const cooldownExercicios = await obterExercicios('CoolDown', nivel, categoriaEtaria);
 
     // Selecionar exercícios que se encaixem no tempo disponível
     const treinoAquecimento = selecionarExercicios(aquecimentoExercicios, tempoAquecimentoSeg);
@@ -81,7 +81,7 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
     exibirTreino('Fortalecimento', treinoFortalecimento, resultadoDiv);
     exibirTreino('Alongamento', treinoAlongamento, resultadoDiv);
     exibirTreino('Equipamento', treinoEquipamento, resultadoDiv);
-    exibirTreino('Cooldown', treinoCooldown, resultadoDiv);
+    exibirTreino('CoolDown', treinoCooldown, resultadoDiv);
 
     // Esconder o loader
     loader.style.display = 'none';
@@ -371,7 +371,7 @@ function createAdminInterface() {
     { label: 'Tempo (segundos):', id: 'tempo-admin', type: 'text', required: false },
     { label: 'Impulso (Equipamento):', id: 'impulso', type: 'select', options: ['nenhum', 'Lira', 'Solo', 'Tecido', 'Trapézio'], required: true },
     { label: 'Categoria Etária:', id: 'categoria-etaria', type: 'select', options: ['todos', 'criança', 'adulto', 'idoso'], required: true },
-    { label: 'Categoria:', id: 'categoria', type: 'select', options: ['nenhum', 'Alongamento', 'Aquecimento', 'Cool Down', 'Fortalecimento', 'Mobilidade'], required: true },
+    { label: 'Categoria:', id: 'categoria', type: 'select', options: ['Todos', 'Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'], required: true },
     { label: 'Nível:', id: 'nivel', type: 'select', options: ['todos', 'iniciante', 'intermediario', 'avancado'], required: true },
   ];
   
