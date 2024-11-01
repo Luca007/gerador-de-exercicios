@@ -93,7 +93,18 @@ h1, h2 {
 .alert {
   background-color: #2c2c2c;
   border: 1px solid #444;
+}
+
+.alert-success {
+  color: #66ff66; /* Verde pastel para alertas */
+}
+
+.alert-danger {
   color: #ff6666; /* Vermelho pastel para alertas */
+}
+
+.alert-warning {
+  color: #ffcc00; /* Amarelo pastel para alertas */
 }
 
 /* Seções de Login e Admin */

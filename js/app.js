@@ -340,7 +340,7 @@ function createAdminInterface() {
     { label: 'Impulso:', id: 'impulso', type: 'text', required: false },
     { label: 'Repetições:', id: 'repeticoes', type: 'text', required: false },
     { label: 'Séries:', id: 'series', type: 'text', required: false },
-    { label: 'Tempo (segundos):', id: 'tempo-admin', type: 'text', required: true },
+    { label: 'Tempo (segundos):', id: 'tempo-admin', type: 'text', required: false },
     { label: 'Categoria etária:', id: 'categoria-etaria', type: 'select', options: ['todos', 'criança', 'adulto', 'idoso'], required: true },
     { label: 'Categoria:', id: 'categoria', type: 'select', options: ['aquecimento', 'pratico', 'finalizacao'], required: true },
     { label: 'Nível:', id: 'nivel', type: 'select', options: ['iniciante', 'intermediario', 'avancado'], required: true },
