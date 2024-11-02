@@ -20,6 +20,9 @@ const treinoForm = document.getElementById('treino-form');
 const resultadoDiv = document.getElementById('resultado');
 const adminButton = document.getElementById('admin-button'); // Botão de administrador
 
+// Loader
+const loader = document.getElementById('loader');
+
 // Funções para gerar o treino
 treinoForm.addEventListener('submit', gerarTreino);
 
@@ -337,16 +340,25 @@ function createLoginForm() {
     const email = emailInput.value;
     const password = passwordInput.value;
 
+    // Mostrar o loader
+    loader.style.display = 'flex';
+
     auth.signInWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        // Login bem-sucedido
-        form.reset();
-        loginError.innerText = '';
-      })
-      .catch((error) => {
-        // Erro no login
-        loginError.innerText = 'Email ou senha incorretos.';
-        console.error('Erro no login:', error);
+    .then((userCredential) => {
+      // Login bem-sucedido
+      form.reset();
+      loginError.innerText = '';
+
+      // Esconder o loader
+      loader.style.display = 'none';
+    })
+    .catch((error) => {
+      // Erro no login
+      loginError.innerText = 'Email ou senha incorretos.';
+      console.error('Erro no login:', error);
+
+      // Esconder o loader
+      loader.style.display = 'none';
       });
   });
 }
@@ -481,6 +493,9 @@ function createAdminInterface() {
   // Adicionar eventos
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Mostrar o loader
+    loader.style.display = 'flex';
   
     const nome = $('#nome').val();
     const etaria = $('#categoria-etaria').val();
@@ -514,10 +529,16 @@ function createAdminInterface() {
       adminMessage.innerHTML = '<div class="alert alert-success">Exercício adicionado com sucesso!</div>';
       form.reset();
       updateFieldRequirements(); // Atualizar obrigatoriedade após resetar o formulário
-    } catch (error) {
+    // Esconder o loader
+    loader.style.display = 'none';
+    } 
+      catch (error) {
       adminMessage.innerHTML = '<div class="alert alert-danger">Erro ao adicionar exercício.</div>';
       console.error('Erro ao adicionar exercício:', error);
-    }
+
+      // Esconder o loader
+      loader.style.display = 'none';
+      }
   
     // Limpar a mensagem após alguns segundos
     setTimeout(() => {
@@ -643,9 +664,18 @@ function buscarEExibirExercicios() {
   // Limpar conteúdo anterior
   exercisesContainer.innerHTML = '';
 
+  // Mostrar o loader
+  loader.style.display = 'flex';
+
   // Buscar exercícios do Firestore
   db.collection('exercicios').get()
     .then((querySnapshot) => {
+      // Esconder o loader
+      loader.style.display = 'none';
+
+      // Remover indicador de carregamento
+      loadingDiv.style.display = 'none';
+
       const exercisesByCategory = {};
 
       querySnapshot.forEach((doc) => {
@@ -693,42 +723,42 @@ function buscarEExibirExercicios() {
         
           // Nome
           const nameCell = document.createElement('td');
-          nameCell.innerText = exercise.nome || '';
+          nameCell.innerText = exercise.nome || 'nome';
           row.appendChild(nameCell);
         
           // Explicação
           const explanationCell = document.createElement('td');
-          explanationCell.innerText = exercise.explicacao || '';
+          explanationCell.innerText = exercise.explicacao || 'explicacao';
           row.appendChild(explanationCell);
         
           // Impulso
           const impulsoCell = document.createElement('td');
-          impulsoCell.innerText = exercise.impulso || '';
+          impulsoCell.innerText = exercise.impulso || 'impulso';
           row.appendChild(impulsoCell);
         
           // Repetições
           const repeticoesCell = document.createElement('td');
-          repeticoesCell.innerText = exercise.repeticoes || '';
+          repeticoesCell.innerText = exercise.repeticoes || 'repeticao';
           row.appendChild(repeticoesCell);
         
           // Séries
           const seriesCell = document.createElement('td');
-          seriesCell.innerText = exercise.series || '';
+          seriesCell.innerText = exercise.series || 'series';
           row.appendChild(seriesCell);
         
           // Tempo
           const tempoCell = document.createElement('td');
-          tempoCell.innerText = exercise.duracao ? `${exercise.duracao} seg` : '';
+          tempoCell.innerText = exercise.duracao ? `${exercise.duracao} seg` : 'duracao';
           row.appendChild(tempoCell);
         
           // Nível
           const nivelCell = document.createElement('td');
-          nivelCell.innerText = exercise.nivel || '';
+          nivelCell.innerText = exercise.nivel || 'nivel';
           row.appendChild(nivelCell);
         
           // Categoria Etária
           const ageCell = document.createElement('td');
-          ageCell.innerText = exercise.etaria || '';
+          ageCell.innerText = exercise.etaria || 'etaria';
           row.appendChild(ageCell);
         
           // Ações
@@ -761,20 +791,31 @@ function buscarEExibirExercicios() {
     .catch((error) => {
       console.error('Erro ao obter exercícios:', error);
       loadingDiv.innerText = 'Erro ao carregar exercícios.';
+
+      // Esconder o loader
+      loader.style.display = 'none';
     });
 }
 
 function deletarExercicio(exerciseId) {
   if (confirm('Tem certeza que deseja deletar este exercício?')) {
+    // Mostrar o loader
+    loader.style.display = 'flex';
+
     db.collection('exercicios').doc(exerciseId).delete()
       .then(() => {
         alert('Exercício deletado com sucesso.');
+        // Esconder o loader
+        loader.style.display = 'none';
         // Atualizar a lista de exercícios
         buscarEExibirExercicios();
       })
       .catch((error) => {
         console.error('Erro ao deletar exercício:', error);
         alert('Erro ao deletar exercício.');
+
+        // Esconder o loader
+        loader.style.display = 'none';
       });
   }
 }
@@ -915,6 +956,9 @@ function editarExercicio(exercise) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // Mostrar o loader
+    loader.style.display = 'flex';
+
     const nome = document.getElementById('nome').value;
     const etaria = document.getElementById('categoria-etaria').value;
     const explicacao = document.getElementById('explicacao').value;
@@ -945,16 +989,21 @@ function editarExercicio(exercise) {
         categoria,
         nivel
       });
-      adminMessage.innerHTML = '<div class="alert alert-success">Exercício atualizado com sucesso!</div>';
+      adminMessage.innerHTML = '<div class="alert alert-success">Exercício atualizado com sucesso!</div>'
 
       // Retornar à lista de exercícios após atualização
       setTimeout(() => {
         criarGerenciamentoExercicios();
+        // Esconder o loader após os 2000 ms
+        loader.style.display = 'none';
       }, 2000);
 
     } catch (error) {
       adminMessage.innerHTML = '<div class="alert alert-danger">Erro ao atualizar exercício.</div>';
       console.error('Erro ao atualizar exercício:', error);
+  
+      // Esconder o loader
+      loader.style.display = 'none';
     }
 
     // Limpar a mensagem após algum tempo
