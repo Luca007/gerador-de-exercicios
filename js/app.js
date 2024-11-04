@@ -448,11 +448,11 @@ function createAdminInterface() {
   logoutButton.id = 'logout-button';
   logoutButton.innerText = 'Sair';
   logoutButton.className = 'btn btn-danger btn-block mt-3';
-
+  
   adminSection.appendChild(h2);
   adminSection.appendChild(form);
-  adminSection.appendChild(logoutButton);
-  adminSection.appendChild(adminMessage);
+  form.appendChild(logoutButton);
+  form.appendChild(adminMessage);
 
   // Adicionar ao body
   document.body.appendChild(adminSection);
@@ -658,24 +658,21 @@ function criarGerenciamentoExercicios() {
 }
 
 function buscarEExibirExercicios() {
-  const exercisesContainer = document.getElementById('exercises-container');
-  const loadingDiv = document.getElementById('loading-exercises');
-
+  const manageSection = document.getElementById('manage-section');
+  
   // Limpar conteúdo anterior
-  exercisesContainer.innerHTML = '';
+  manageSection.innerHTML = '';
 
-  // Mostrar o loader
-  loader.style.display = 'flex';
+  // Criar um indicador de carregamento
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'loading-exercises';
+  loadingDiv.className = 'text-center';
+  loadingDiv.innerText = 'Carregando exercícios...';
+  manageSection.appendChild(loadingDiv);
 
   // Buscar exercícios do Firestore
   db.collection('exercicios').get()
     .then((querySnapshot) => {
-      // Esconder o loader
-      loader.style.display = 'none';
-
-      // Remover indicador de carregamento
-      loadingDiv.style.display = 'none';
-
       const exercisesByCategory = {};
 
       querySnapshot.forEach((doc) => {
@@ -694,20 +691,58 @@ function buscarEExibirExercicios() {
 
       // Exibir exercícios agrupados por categoria
       for (const category in exercisesByCategory) {
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'category-section';
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'section';
+        sectionDiv.id = category.toLowerCase();
 
-        const categoryTitle = document.createElement('h3');
-        categoryTitle.innerText = `Categoria: ${category}`;
-        categoryDiv.appendChild(categoryTitle);
+        // Cabeçalho da seção
+        const sectionHeader = document.createElement('div');
+        sectionHeader.className = 'section-header';
 
+        // Ícone da seção (utilizando Font Awesome)
+        const iconElement = document.createElement('i');
+
+        // Definir a classe do ícone com base na categoria
+        switch (category.toLowerCase()) {
+          case 'aquecimento':
+            iconElement.className = 'section-icon fas fa-fire'; // Ícone de fogo para Aquecimento
+            break;
+          case 'fortalecimento':
+            iconElement.className = 'section-icon fas fa-dumbbell'; // Ícone de haltere para Fortalecimento
+            break;
+          case 'alongamento':
+            iconElement.className = 'section-icon fas fa-spa'; // Ícone de spa para Alongamento
+            break;
+          case 'equipamento':
+            iconElement.className = 'section-icon fas fa-tools'; // Ícone de ferramentas para Equipamento
+            break;
+          case 'cooldown':
+            iconElement.className = 'section-icon fas fa-snowflake'; // Ícone de floco de neve para CoolDown
+            break;
+          default:
+            iconElement.className = 'section-icon fas fa-question'; // Ícone de interrogação como padrão
+        }
+
+        // Adicionar o ícone ao cabeçalho da seção
+        sectionHeader.appendChild(iconElement);
+
+        // Título da seção
+        const sectionTitle = document.createElement('h2');
+        sectionTitle.className = 'section-title';
+        sectionTitle.innerText = category;
+
+        sectionHeader.appendChild(iconElement);
+        sectionHeader.appendChild(sectionTitle);
+        sectionDiv.appendChild(sectionHeader);
+
+        // Criar a tabela
         const table = document.createElement('table');
-        table.className = 'table table-bordered';
+        table.className = 'exercise-table';
 
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
 
-        const headers = ['Nome', 'Explicação', 'Impulso', 'Repetições', 'Séries', 'Tempo', 'Nível', 'Categoria Etária', 'Ações'];
+        const headers = ['Nome', 'Explicação', 'Repetições', 'Séries', 'Tempo', 'Impulso (Equipamento)', 'Categoria Etária', 'Nível', 'Ações'];
         headers.forEach((headerText) => {
           const th = document.createElement('th');
           th.innerText = headerText;
@@ -720,80 +755,79 @@ function buscarEExibirExercicios() {
 
         exercisesByCategory[category].forEach((exercise) => {
           const row = document.createElement('tr');
-        
+
           // Nome
           const nameCell = document.createElement('td');
-          nameCell.innerText = exercise.nome || 'nome';
+          nameCell.innerText = exercise.nome || '';
           row.appendChild(nameCell);
-        
+
           // Explicação
           const explanationCell = document.createElement('td');
-          explanationCell.innerText = exercise.explicacao || 'explicacao';
+          explanationCell.className = 'explanation-cell';
+          explanationCell.innerText = exercise.explicacao || '';
           row.appendChild(explanationCell);
-        
-          // Impulso
-          const impulsoCell = document.createElement('td');
-          impulsoCell.innerText = exercise.impulso || 'impulso';
-          row.appendChild(impulsoCell);
-        
+
           // Repetições
           const repeticoesCell = document.createElement('td');
-          repeticoesCell.innerText = exercise.repeticoes || 'repeticao';
+          repeticoesCell.innerText = exercise.repeticoes || '';
           row.appendChild(repeticoesCell);
-        
+
           // Séries
           const seriesCell = document.createElement('td');
-          seriesCell.innerText = exercise.series || 'series';
+          seriesCell.innerText = exercise.series || '';
           row.appendChild(seriesCell);
-        
+
           // Tempo
           const tempoCell = document.createElement('td');
-          tempoCell.innerText = exercise.duracao ? `${exercise.duracao} seg` : 'duracao';
+          tempoCell.innerText = exercise.duracao ? `${exercise.duracao} seg` : '';
           row.appendChild(tempoCell);
-        
+
+          // Impulso
+          const impulsoCell = document.createElement('td');
+          impulsoCell.innerText = exercise.impulso || '';
+          row.appendChild(impulsoCell);
+
+          // Categoria Etária
+          const etariaCell = document.createElement('td');
+          etariaCell.innerText = exercise.etaria || '';
+          row.appendChild(etariaCell);
+
           // Nível
           const nivelCell = document.createElement('td');
-          nivelCell.innerText = exercise.nivel || 'nivel';
+          nivelCell.innerText = exercise.nivel || '';
           row.appendChild(nivelCell);
-        
-          // Categoria Etária
-          const ageCell = document.createElement('td');
-          ageCell.innerText = exercise.etaria || 'etaria';
-          row.appendChild(ageCell);
-        
+
           // Ações
           const actionsCell = document.createElement('td');
-        
+          actionsCell.className = 'actions-cell';
+
           // Botão Editar
           const editButton = document.createElement('button');
           editButton.className = 'btn btn-primary btn-sm mr-2';
           editButton.innerText = 'Editar';
           editButton.addEventListener('click', () => editarExercicio(exercise));
           actionsCell.appendChild(editButton);
-        
+
           // Botão Deletar
           const deleteButton = document.createElement('button');
           deleteButton.className = 'btn btn-danger btn-sm';
           deleteButton.innerText = 'Deletar';
           deleteButton.addEventListener('click', () => deletarExercicio(exercise.id));
           actionsCell.appendChild(deleteButton);
-        
+
           row.appendChild(actionsCell);
-        
+
           tbody.appendChild(row);
         });
-                
+
         table.appendChild(tbody);
-        categoryDiv.appendChild(table);
-        exercisesContainer.appendChild(categoryDiv);
+        sectionDiv.appendChild(table);
+        manageSection.appendChild(sectionDiv);
       }
     })
     .catch((error) => {
       console.error('Erro ao obter exercícios:', error);
       loadingDiv.innerText = 'Erro ao carregar exercícios.';
-
-      // Esconder o loader
-      loader.style.display = 'none';
     });
 }
 
