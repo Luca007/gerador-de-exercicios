@@ -636,14 +636,17 @@ function criarGerenciamentoExercicios() {
   h2.innerText = 'Gerenciar Exercícios';
   h2.className = 'text-center mb-4';
 
-  manageSection.appendChild(h2);
+  // Adicionar o botão de voltar com o ícone de casinha
+  const backButton = document.createElement('button');
+  backButton.type = 'button';
+  backButton.className = 'btn btn-secondary mb-3 voltar';
+  backButton.innerHTML = '<i class="fas fa-home mr-2"></i> Voltar';
+  backButton.addEventListener('click', () => {
+    createAdminInterface();
+  });
 
-  // Criar um indicador de carregamento
-  const loadingDiv = document.createElement('div');
-  loadingDiv.id = 'loading-exercises';
-  loadingDiv.className = 'text-center';
-  loadingDiv.innerText = 'Carregando exercícios...';
-  manageSection.appendChild(loadingDiv);
+  manageSection.appendChild(h2);
+  manageSection.appendChild(backButton);
 
   // Contêiner para exercícios
   const exercisesContainer = document.createElement('div');
@@ -658,17 +661,13 @@ function criarGerenciamentoExercicios() {
 }
 
 function buscarEExibirExercicios() {
-  const manageSection = document.getElementById('manage-section');
+  const exercisesContainer = document.getElementById('exercises-container');
   
   // Limpar conteúdo anterior
-  manageSection.innerHTML = '';
+  exercisesContainer.innerHTML = '';
 
-  // Criar um indicador de carregamento
-  const loadingDiv = document.createElement('div');
-  loadingDiv.id = 'loading-exercises';
-  loadingDiv.className = 'text-center';
-  loadingDiv.innerText = 'Carregando exercícios...';
-  manageSection.appendChild(loadingDiv);
+  // Mostrar o loader padrão
+  loader.style.display = 'flex';
 
   // Buscar exercícios do Firestore
   db.collection('exercicios').get()
@@ -686,8 +685,8 @@ function buscarEExibirExercicios() {
         exercisesByCategory[category].push(exercise);
       });
 
-      // Remover indicador de carregamento
-      loadingDiv.style.display = 'none';
+      // Esconder o loader padrão
+      loader.style.display = 'none';
 
       // Exibir exercícios agrupados por categoria
       for (const category in exercisesByCategory) {
@@ -731,7 +730,6 @@ function buscarEExibirExercicios() {
         sectionTitle.className = 'section-title';
         sectionTitle.innerText = category;
 
-        sectionHeader.appendChild(iconElement);
         sectionHeader.appendChild(sectionTitle);
         sectionDiv.appendChild(sectionHeader);
 
@@ -822,12 +820,16 @@ function buscarEExibirExercicios() {
 
         table.appendChild(tbody);
         sectionDiv.appendChild(table);
-        manageSection.appendChild(sectionDiv);
+
+        // Adicionar a seção ao exercisesContainer, não ao manageSection
+        exercisesContainer.appendChild(sectionDiv);
       }
     })
     .catch((error) => {
       console.error('Erro ao obter exercícios:', error);
-      loadingDiv.innerText = 'Erro ao carregar exercícios.';
+      // Esconder o loader padrão
+      loader.style.display = 'none';
+      exercisesContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar exercícios.</div>';
     });
 }
 
@@ -1030,7 +1032,7 @@ function editarExercicio(exercise) {
         criarGerenciamentoExercicios();
         // Esconder o loader após os 2000 ms
         loader.style.display = 'none';
-      }, 2000);
+      }, 20);
 
     } catch (error) {
       adminMessage.innerHTML = '<div class="alert alert-danger">Erro ao atualizar exercício.</div>';
