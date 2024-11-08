@@ -37,6 +37,72 @@ function gerarTreino(e) {
   montarTreino(tempoTotal, nivel, categoriaEtaria);
 }
 
+// Função para exibir alerta e fechar ao clicar
+function exibirAlerta(tipo, mensagem) {
+  const tipos = {
+    sucesso: {
+      bgColor: 'bg-green-100 dark:bg-green-900',
+      borderColor: 'border-green-500 dark:border-green-700',
+      textColor: 'text-green-900 dark:text-green-100',
+      hoverColor: 'hover:bg-green-200 dark:hover:bg-green-800',
+      iconColor: 'text-green-600',
+    },
+    info: {
+      bgColor: 'bg-blue-100 dark:bg-blue-900',
+      borderColor: 'border-blue-500 dark:border-blue-700',
+      textColor: 'text-blue-900 dark:text-blue-100',
+      hoverColor: 'hover:bg-blue-200 dark:hover:bg-blue-800',
+      iconColor: 'text-blue-600',
+    },
+    aviso: {
+      bgColor: 'bg-yellow-100 dark:bg-yellow-900',
+      borderColor: 'border-yellow-500 dark:border-yellow-700',
+      textColor: 'text-yellow-900 dark:text-yellow-100',
+      hoverColor: 'hover:bg-yellow-200 dark:hover:bg-yellow-800',
+      iconColor: 'text-yellow-600',
+    },
+    erro: {
+      bgColor: 'bg-red-100 dark:bg-red-900',
+      borderColor: 'border-red-500 dark:border-red-700',
+      textColor: 'text-red-900 dark:text-red-100',
+      hoverColor: 'hover:bg-red-200 dark:hover:bg-red-800',
+      iconColor: 'text-red-600',
+    },
+  };
+
+  const tipoAlert = tipos[tipo] || tipos.info;
+
+  const alertaDiv = document.createElement('div');
+  alertaDiv.className = `space-y-2 p-4 ${tipoAlert.bgColor} ${tipoAlert.borderColor} ${tipoAlert.textColor} rounded-lg flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-105 ${tipoAlert.hoverColor} shadow-lg`;
+  alertaDiv.role = 'alert';
+  alertaDiv.style.position = 'fixed';
+  alertaDiv.style.top = '2dvh';
+  alertaDiv.style.left = '1dvw';
+  alertaDiv.style.zIndex = '1000';
+  alertaDiv.style.maxWidth = '90%';
+  alertaDiv.style.width = 'auto';
+
+  const svgIcon = `
+    <svg stroke="currentColor" viewBox="0 0 24 24" fill="none" class="h-5 w-5 flex-shrink-0 mr-2 ${tipoAlert.iconColor}" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 16h-1v-4h1m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+    </svg>
+  `;
+
+  alertaDiv.innerHTML = `
+    ${svgIcon}
+    <p class="text-sm font-semibold">${mensagem}</p>
+  `;
+
+  alertaDiv.onclick = function () {
+    alertaDiv.style.display = 'none';
+  };
+
+  document.body.appendChild(alertaDiv);
+
+  setTimeout(() => {
+    alertaDiv.style.display = 'none';
+  }, 5000);
+}
 
 async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
   resultadoDiv.innerHTML = '';
@@ -97,7 +163,6 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
     loader.style.display = 'none';
   }
 }
-
 
 async function obterExercicios(categoria, nivel, categoriaEtaria) {
   const exerciciosRef = db.collection('exercicios');
@@ -260,8 +325,6 @@ function removeExistingSections() {
   if (existingEdit) existingEdit.remove();
 }
 
-
-
 // Função para criar o formulário de login
 function createLoginForm() {
   // Remover instâncias anteriores
@@ -291,7 +354,6 @@ function createLoginForm() {
   const emailInput = document.createElement('input');
   emailInput.type = 'email';
   emailInput.id = 'email';
-  emailInput.required = true;
   emailInput.className = 'form-control';
 
   emailGroup.appendChild(emailLabel);
@@ -307,7 +369,6 @@ function createLoginForm() {
   const passwordInput = document.createElement('input');
   passwordInput.type = 'password';
   passwordInput.id = 'password';
-  passwordInput.required = true;
   passwordInput.className = 'form-control';
 
   passwordGroup.appendChild(passwordLabel);
@@ -337,28 +398,38 @@ function createLoginForm() {
   // Adicionar evento de submissão
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = emailInput.value;
-    const password = passwordInput.value;
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    // Validação personalizada
+    if (!email) {
+      exibirAlerta('erro', 'Por favor, preencha o campo de email.');
+      return;
+    }
+    if (!password) {
+      exibirAlerta('erro', 'Por favor, preencha o campo de senha.');
+      return;
+    }
 
     // Mostrar o loader
     loader.style.display = 'flex';
 
     auth.signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      // Login bem-sucedido
-      form.reset();
-      loginError.innerText = '';
+      .then((userCredential) => {
+        // Login bem-sucedido
+        form.reset();
+        loginError.innerText = '';
 
-      // Esconder o loader
-      loader.style.display = 'none';
-    })
-    .catch((error) => {
-      // Erro no login
-      loginError.innerText = 'Email ou senha incorretos.';
-      console.error('Erro no login:', error);
+        // Esconder o loader
+        loader.style.display = 'none';
+      })
+      .catch((error) => {
+        // Erro no login
+        exibirAlerta('erro', 'Email ou senha incorretos.');
+        console.error('Erro no login:', error);
 
-      // Esconder o loader
-      loader.style.display = 'none';
+        // Esconder o loader
+        loader.style.display = 'none';
       });
   });
 }
@@ -407,13 +478,11 @@ function createAdminInterface() {
     if (field.type === 'textarea') {
       input = document.createElement('textarea');
       input.id = field.id;
-      input.required = field.required;
       input.rows = 3;
       input.className = 'form-control';
     } else if (field.type === 'select') {
       input = document.createElement('select');
       input.id = field.id;
-      input.required = field.required;
       input.className = 'form-control';
       field.options.forEach(optionValue => {
         const option = document.createElement('option');
@@ -425,7 +494,6 @@ function createAdminInterface() {
       input = document.createElement('input');
       input.type = field.type;
       input.id = field.id;
-      input.required = field.required;
       input.className = 'form-control';
     }
 
@@ -468,16 +536,12 @@ function createAdminInterface() {
 
     if (tempoVal === '') {
       // Tempo não preenchido, séries e repetições são obrigatórios
-      repeticoesInput.required = true;
-      seriesInput.required = true;
-      $('#repeticoes').closest('.form-group').find('label').html('Repetições: *');
-      $('#series').closest('.form-group').find('label').html('Séries: *');
+      repeticoesInput.required = false;
+      seriesInput.required = false;
     } else {
       // Tempo preenchido, séries e repetições não são obrigatórios
       repeticoesInput.required = false;
       seriesInput.required = false;
-      $('#repeticoes').closest('.form-group').find('label').html('Repetições:');
-      $('#series').closest('.form-group').find('label').html('Séries:');
     }
   }
 
@@ -494,30 +558,58 @@ function createAdminInterface() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Mostrar o loader
-    loader.style.display = 'flex';
-  
-    const nome = $('#nome').val();
-    const etaria = $('#categoria-etaria').val();
-    const explicacao = $('#explicacao').val();
+    // Validação personalizada
+    const nome = $('#nome').val().trim();
+    const explicacao = $('#explicacao').val().trim();
     const impulso = $('#impulso').val();
-    const repeticoes = $('#repeticoes').val();
-    const series = $('#series').val();
-    const tempoVal = $('#tempo-admin').val().replace(/\D/g, '');
-    const tempo = tempoVal ? parseInt(tempoVal) : null;
+    const categoriaEtaria = $('#categoria-etaria').val();
     const categoria = $('#categoria').val();
     const nivel = $('#nivel').val();
-  
-    // Validação dos campos obrigatórios
-    if (!tempo && (!repeticoes || !series)) {
-      adminMessage.innerHTML = '<div class="alert alert-danger">Por favor, preencha o campo de tempo ou os campos de séries e repetições.</div>';
+
+    if (!nome) {
+      exibirAlerta('erro', 'Por favor, preencha o campo Nome do Exercício.');
       return;
     }
-  
+    if (!explicacao) {
+      exibirAlerta('erro', 'Por favor, preencha o campo Explicação.');
+      return;
+    }
+    if (!impulso) {
+      exibirAlerta('erro', 'Por favor, selecione o Impulso.');
+      return;
+    }
+    if (!categoriaEtaria) {
+      exibirAlerta('erro', 'Por favor, selecione a Categoria Etária.');
+      return;
+    }
+    if (!categoria) {
+      exibirAlerta('erro', 'Por favor, selecione a Categoria.');
+      return;
+    }
+    if (!nivel) {
+      exibirAlerta('erro', 'Por favor, selecione o Nível.');
+      return;
+    }
+
+    // Mostrar o loader
+    loader.style.display = 'flex';
+
+    const repeticoes = $('#repeticoes').val().replace(/\D/g, '') || null;
+    const series = $('#series').val().replace(/\D/g, '') || null;
+    const tempoVal = $('#tempo-admin').val().replace(/\D/g, '');
+    const tempo = tempoVal ? parseInt(tempoVal) : null;
+
+    // Validação dos campos obrigatórios
+    if (!tempo && (!repeticoes || !series)) {
+      exibirAlerta('erro', 'Preencha o Tempo ou as Séries e Repetições.');
+      loader.style.display = 'none';
+      return;
+    }
+
     try {
       await db.collection('exercicios').add({
         nome,
-        etaria,
+        etaria: categoriaEtaria,
         explicacao,
         impulso,
         repeticoes,
@@ -526,20 +618,17 @@ function createAdminInterface() {
         categoria,
         nivel
       });
-      adminMessage.innerHTML = '<div class="alert alert-success">Exercício adicionado com sucesso!</div>';
+      exibirAlerta('sucesso', 'Exercício adicionado com sucesso!');
       form.reset();
       updateFieldRequirements(); // Atualizar obrigatoriedade após resetar o formulário
-    // Esconder o loader
-    loader.style.display = 'none';
-    } 
-      catch (error) {
-      adminMessage.innerHTML = '<div class="alert alert-danger">Erro ao adicionar exercício.</div>';
-      console.error('Erro ao adicionar exercício:', error);
-
-      // Esconder o loader
       loader.style.display = 'none';
-      }
-  
+    } 
+    catch (error) {
+      exibirAlerta('erro', 'Erro ao adicionar exercício.');
+      console.error('Erro ao adicionar exercício:', error);
+      loader.style.display = 'none';
+    }
+
     // Limpar a mensagem após alguns segundos
     setTimeout(() => {
       adminMessage.innerHTML = '';
@@ -620,7 +709,6 @@ auth.onAuthStateChanged((user) => {
     // A interface de login será gerada ao clicar no botão
   }
 });
-
 
 // Function to create the exercise management interface
 function criarGerenciamentoExercicios() {
@@ -840,7 +928,7 @@ function deletarExercicio(exerciseId) {
 
     db.collection('exercicios').doc(exerciseId).delete()
       .then(() => {
-        alert('Exercício deletado com sucesso.');
+        exibirAlerta('sucesso', 'Exercício deletado com sucesso.');
         // Esconder o loader
         loader.style.display = 'none';
         // Atualizar a lista de exercícios
@@ -848,7 +936,7 @@ function deletarExercicio(exerciseId) {
       })
       .catch((error) => {
         console.error('Erro ao deletar exercício:', error);
-        alert('Erro ao deletar exercício.');
+        exibirAlerta('erro', 'Erro ao deletar exercício.');
 
         // Esconder o loader
         loader.style.display = 'none';
@@ -899,14 +987,12 @@ function editarExercicio(exercise) {
     if (field.type === 'textarea') {
       input = document.createElement('textarea');
       input.id = field.id;
-      input.required = field.required;
       input.rows = 3;
       input.className = 'form-control';
       input.value = field.value || '';
     } else if (field.type === 'select') {
       input = document.createElement('select');
       input.id = field.id;
-      input.required = field.required;
       input.className = 'form-control';
       field.options.forEach(optionValue => {
         const option = document.createElement('option');
@@ -921,7 +1007,6 @@ function editarExercicio(exercise) {
       input = document.createElement('input');
       input.type = field.type;
       input.id = field.id;
-      input.required = field.required;
       input.className = 'form-control';
       input.value = field.value || '';
     }
@@ -969,16 +1054,12 @@ function editarExercicio(exercise) {
 
     if (tempoVal === '') {
       // Tempo não preenchido, séries e repetições são obrigatórios
-      repeticoesInput.required = true;
-      seriesInput.required = true;
-      $('#repeticoes').closest('.form-group').find('label').html('Repetições: *');
-      $('#series').closest('.form-group').find('label').html('Séries: *');
+      repeticoesInput.required = false;
+      seriesInput.required = false;
     } else {
       // Tempo preenchido, séries e repetições não são obrigatórios
       repeticoesInput.required = false;
       seriesInput.required = false;
-      $('#repeticoes').closest('.form-group').find('label').html('Repetições:');
-      $('#series').closest('.form-group').find('label').html('Séries:');
     }
   }
 
@@ -992,31 +1073,59 @@ function editarExercicio(exercise) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // Validação personalizada
+    const nome = document.getElementById('nome').value.trim();
+    const explicacao = document.getElementById('explicacao').value.trim();
+    const impulso = document.getElementById('impulso').value;
+    const categoriaEtaria = document.getElementById('categoria-etaria').value;
+    const categoria = document.getElementById('categoria').value;
+    const nivel = document.getElementById('nivel').value;
+
+    if (!nome) {
+      exibirAlerta('erro', 'Por favor, preencha o campo Nome do Exercício.');
+      return;
+    }
+    if (!explicacao) {
+      exibirAlerta('erro', 'Por favor, preencha o campo Explicação.');
+      return;
+    }
+    if (!impulso) {
+      exibirAlerta('erro', 'Por favor, selecione o Impulso.');
+      return;
+    }
+    if (!categoriaEtaria) {
+      exibirAlerta('erro', 'Por favor, selecione a Categoria Etária.');
+      return;
+    }
+    if (!categoria) {
+      exibirAlerta('erro', 'Por favor, selecione a Categoria.');
+      return;
+    }
+    if (!nivel) {
+      exibirAlerta('erro', 'Por favor, selecione o Nível.');
+      return;
+    }
+
     // Mostrar o loader
     loader.style.display = 'flex';
 
-    const nome = document.getElementById('nome').value;
-    const etaria = document.getElementById('categoria-etaria').value;
-    const explicacao = document.getElementById('explicacao').value;
-    const impulso = document.getElementById('impulso').value;
     const repeticoesVal = document.getElementById('repeticoes').value.replace(/\D/g, '');
     const seriesVal = document.getElementById('series').value.replace(/\D/g, '');
     const repeticoes = repeticoesVal ? parseInt(repeticoesVal) : null;
     const series = seriesVal ? parseInt(seriesVal) : null;
     const tempoVal = document.getElementById('tempo-admin').value.replace(/\D/g, '');
     const tempo = tempoVal ? parseInt(tempoVal) : null;
-    const categoria = document.getElementById('categoria').value;
-    const nivel = document.getElementById('nivel').value;
 
     if (!tempo && (!repeticoes || !series)) {
-      adminMessage.innerHTML = '<div class="alert alert-danger">Por favor, preencha o campo de tempo ou os campos de séries e repetições.</div>';
+      exibirAlerta('erro', 'Preencha o Tempo ou as Séries e Repetições.');
+      loader.style.display = 'none';
       return;
     }
 
     try {
       await db.collection('exercicios').doc(exercise.id).update({
         nome,
-        etaria,
+        etaria: categoriaEtaria,
         explicacao,
         impulso,
         repeticoes,
@@ -1025,7 +1134,7 @@ function editarExercicio(exercise) {
         categoria,
         nivel
       });
-      adminMessage.innerHTML = '<div class="alert alert-success">Exercício atualizado com sucesso!</div>'
+      exibirAlerta('sucesso', 'Exercício atualizado com sucesso!');
 
       // Retornar à lista de exercícios após atualização
       setTimeout(() => {
@@ -1035,7 +1144,7 @@ function editarExercicio(exercise) {
       }, 20);
 
     } catch (error) {
-      adminMessage.innerHTML = '<div class="alert alert-danger">Erro ao atualizar exercício.</div>';
+      exibirAlerta('erro', 'Erro ao atualizar exercício.');
       console.error('Erro ao atualizar exercício:', error);
   
       // Esconder o loader
@@ -1064,4 +1173,3 @@ function adicionarBotaoGerenciarExercicios() {
     adminSection.appendChild(manageButton);
   }
 }
-
