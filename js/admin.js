@@ -1,3 +1,10 @@
+import { auth, db } from './firebase.js';
+import { adicionarBotaoGerenciarExercicios } from './exercicio.js';
+import { exibirAlerta, removeExistingSections, applyInputMasks, loader } from './utils.js';
+import { signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js';
+import { collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js';
+
+
 // Elementos do DOM relacionados à administração
 const adminButton = document.getElementById('admin-button'); // Botão de administrador
 
@@ -23,7 +30,7 @@ function createLoginForm() {
     const form = document.createElement('form');
     form.id = 'login-form';
     form.className = 'mx-auto';
-    form.style.maxWidth = '400px';
+    form.style.maxWidth = '33dvw';
 
     const emailGroup = document.createElement('div');
     emailGroup.className = 'form-group';
@@ -76,31 +83,21 @@ function createLoginForm() {
     // Adicionar ao body
     document.body.appendChild(loginSection);
 
-    // Adicionar evento de submissão
+    // Evento de submissão do formulário de login
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const email = emailInput.value.trim();
         const password = passwordInput.value.trim();
-
-        // Validação personalizada
-        if (!email) {
-        exibirAlerta('erro', 'Por favor, preencha o campo de email.');
-        return;
-        }
-        if (!password) {
-        exibirAlerta('erro', 'Por favor, preencha o campo de senha.');
-        return;
-        }
-
+    
         // Mostrar o loader
         loader.style.display = 'flex';
-
-        auth.signInWithEmailAndPassword(email, password)
+    
+        signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             // Login bem-sucedido
             form.reset();
             loginError.innerText = '';
-
+    
             // Esconder o loader
             loader.style.display = 'none';
         })
@@ -108,7 +105,7 @@ function createLoginForm() {
             // Erro no login
             exibirAlerta('erro', 'Email ou senha incorretos.');
             console.error('Erro no login:', error);
-
+    
             // Esconder o loader
             loader.style.display = 'none';
         });
@@ -116,7 +113,7 @@ function createLoginForm() {
 }
 
 // Função para criar a interface de administração
-function createAdminInterface() {
+export function createAdminInterface() {
     // Remover instâncias anteriores
     removeExistingSections();
   
@@ -193,13 +190,16 @@ function createAdminInterface() {
     adminMessage.id = 'admin-message';
     adminMessage.className = 'mt-3';
   
+    // Criar o botão de logout
     const logoutButton = document.createElement('button');
+    logoutButton.type = 'button';  // Adicionado para evitar submissão do formulário
     logoutButton.id = 'logout-button';
     logoutButton.innerText = 'Sair';
     logoutButton.className = 'btn btn-danger btn-block mt-3';
-    
+
     adminSection.appendChild(h2);
     adminSection.appendChild(form);
+    // Adicionar logoutButton ao formulário
     form.appendChild(logoutButton);
     form.appendChild(adminMessage);
   
@@ -288,43 +288,43 @@ function createAdminInterface() {
       }
   
       try {
-        await db.collection('exercicios').add({
-          nome,
-          etaria: categoriaEtaria,
-          explicacao,
-          impulso,
-          repeticoes,
-          series,
-          duracao: tempo,
-          categoria,
-          nivel
+        await addDoc(collection(db, 'exercicios'), {
+            nome,
+            etaria: categoriaEtaria,
+            explicacao,
+            impulso,
+            repeticoes,
+            series,
+            duracao: tempo,
+            categoria,
+            nivel
         });
         exibirAlerta('sucesso', 'Exercício adicionado com sucesso!');
         form.reset();
         updateFieldRequirements(); // Atualizar obrigatoriedade após resetar o formulário
         loader.style.display = 'none';
-      } 
-      catch (error) {
+    } catch (error) {
         exibirAlerta('erro', 'Erro ao adicionar exercício.');
         console.error('Erro ao adicionar exercício:', error);
         loader.style.display = 'none';
-      }
-  
-      // Limpar a mensagem após alguns segundos
-      setTimeout(() => {
-        adminMessage.innerHTML = '';
-      }, 3000);
-    });
+    }
+});
     
+
+    // Função de logout
     logoutButton.addEventListener('click', () => {
-      auth.signOut().then(() => {
-        // Logout bem-sucedido
-        adminSection.remove(); // Remover a interface de administração
-        console.log('Usuário desconectado');
-      }).catch((error) => {
-        console.error('Erro ao desconectar:', error);
-      });
-    });
+        signOut(auth)
+            .then(() => {
+                // Logout bem-sucedido
+                adminSection.remove(); // Remover a interface de administração
+                exibirAlerta('sucesso', 'Logout realizado com sucesso.');
+                console.log('Usuário desconectado');
+            })
+            .catch((error) => {
+                exibirAlerta('erro', 'Erro ao desconectar.');
+                console.error('Erro ao desconectar:', error);
+            });
+    });    
 }
   
   

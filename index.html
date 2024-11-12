@@ -16,6 +16,7 @@
   <!-- Seu CSS personalizado -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/loader.css">
+  <link rel="stylesheet" href="css/select.css">
 </head>
 <body>
   <!-- Navbar -->
@@ -27,33 +28,32 @@
     <h1 class="text-center mb-4">Gerador de Treinos</h1>
 
     <!-- Formulário para gerar treinos -->
-    <form id="treino-form" class="mx-auto" style="max-width: 500px;">
+    <form id="treino-form" class="mx-auto treino-form">
       <div class="form-group">
         <label for="tempo-disponivel">Tempo disponível (min):</label>
         <input type="text" class="form-control" id="tempo-disponivel" name="tempo" required>
       </div>
 
-      <div class="form-group">
-        <label for="nivel">Nível:</label>
-        <select class="form-control" id="nivel" name="nivel" required>
-          <option value="todos">Todos</option>
-          <option value="iniciante">Iniciante</option>
-          <option value="intermediario">Intermediário</option>
-          <option value="avancado">Avançado</option>
-        </select>
+      <div class="options-container" id="optionsContainer1">
+        <div class="selection-indicator" id="selectionIndicator1"></div>
+        <div class="hover-effect-top" id="hoverEffectTop1"></div>
+        <div class="hover-effect-bottom" id="hoverEffectBottom1"></div>
+        <div class="option selected" data-value="todos">Todos</div>
+        <div class="option" data-value="iniciante">Iniciante</div>
+        <div class="option" data-value="intermediario">Intermediário</div>
+        <div class="option" data-value="avancado">Avançado</div>
+      </div>
+      <div class="options-container" id="optionsContainer2">
+          <div class="selection-indicator" id="selectionIndicator2"></div>
+          <div class="hover-effect-top" id="hoverEffectTop2"></div>
+          <div class="hover-effect-bottom" id="hoverEffectBottom2"></div>
+          <div class="option selected" data-value="todos">Todos</div>
+          <div class="option" data-value="crianca">Criança</div>
+          <div class="option" data-value="adulto">Adulto</div>
+          <div class="option" data-value="idoso">Idoso</div>
       </div>
 
-      <div class="form-group">
-        <label for="categoria-etaria">Categoria Etária:</label>
-        <select class="form-control" id="categoria-etaria" name="categoria-etaria" required>
-          <option value="todos">Todos</option>
-          <option value="criança">Criança</option>
-          <option value="adulto">Adulto</option>
-          <option value="idoso">Idoso</option>
-        </select>
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-block">Gerar Treino</button>
+      <button type="submit" class="btn btn-primary btn-block form-btn">Gerar Treino</button>
     </form>
 
     <!-- Loader -->
@@ -96,21 +96,7 @@
   <!-- Bootstrap JS -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-  <!-- Firebase SDKs -->
-  <!-- Firebase App -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-  <!-- Firebase Auth -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-  <!-- Firebase Firestore -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
-
   <!-- Scripts JavaScript -->
-  <script src="js/firebase.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/treino.js"></script>
-  <script src="js/admin.js"></script>
-  <script src="js/exercicio.js"></script>
-  <script src="js/main.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

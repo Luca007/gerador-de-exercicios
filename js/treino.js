@@ -1,3 +1,7 @@
+import { db } from './firebase.js';
+import { collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js';
+import { embaralharArray, exibirAlerta, loader } from './utils.js';
+
 // Elementos do DOM relacionados ao treino
 const treinoForm = document.getElementById('treino-form');
 const resultadoDiv = document.getElementById('resultado');
@@ -6,16 +10,29 @@ const resultadoDiv = document.getElementById('resultado');
 treinoForm.addEventListener('submit', gerarTreino);
 
 function gerarTreino(e) {
-  e.preventDefault();
-
-  const tempoTotal = parseInt($('#tempo-disponivel').val().replace(/\D/g, ''));
-  const nivel = $('#nivel').val();
-  const categoriaEtaria = $('#categoria-etaria').val();
-
-  // Chamar a função para montar o treino
-  montarTreino(tempoTotal, nivel, categoriaEtaria);
+    e.preventDefault();
+  
+    const tempoTotalInput = document.getElementById('tempo-disponivel');
+    const tempoTotal = parseInt(tempoTotalInput.value.replace(/\D/g, ''));
+  
+    if (!tempoTotal || isNaN(tempoTotal)) {
+      exibirAlerta('erro', 'Por favor, preencha o campo Tempo disponível.');
+      return;
+    }
+  
+    // Obter o nível selecionado
+    const nivelElemento = document.querySelector('#optionsContainer1 .option.selected');
+    const nivel = nivelElemento ? nivelElemento.getAttribute('data-value') : 'todos';
+  
+    // Obter a categoria etária selecionada
+    const categoriaEtariaElemento = document.querySelector('#optionsContainer2 .option.selected');
+    const categoriaEtaria = categoriaEtariaElemento ? categoriaEtariaElemento.getAttribute('data-value') : 'todos';
+  
+    // Chamar a função para montar o treino
+    montarTreino(tempoTotal, nivel, categoriaEtaria);
 }
 
+      
 async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
   resultadoDiv.innerHTML = '';
 
@@ -77,25 +94,20 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
 }
 
 async function obterExercicios(categoria, nivel, categoriaEtaria) {
-  const exerciciosRef = db.collection('exercicios');
-  let query = exerciciosRef;
-
-  // Condição para Categoria
-  query = query.where('categoria', 'in', [categoria, 'nenhum']);
-
-  // Condição para Nível
-  if (nivel !== 'todos') {
-    query = query.where('nivel', '==', nivel);
-  }
-
-  // Condição para Categoria Etária
-  if (categoriaEtaria !== 'todos') {
-    query = query.where('etaria', '==', categoriaEtaria);
-  }
-
-  const querySnapshot = await query.get();
-  return querySnapshot.docs.map(doc => doc.data());
+    let q = query(collection(db, 'exercicios'), where('categoria', 'in', [categoria, 'nenhum']));
+  
+    if (nivel !== 'todos') {
+      q = query(q, where('nivel', '==', nivel));
+    }
+  
+    if (categoriaEtaria !== 'todos') {
+      q = query(q, where('etaria', '==', categoriaEtaria));
+    }
+  
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data());
 }
+
 
 function selecionarExercicios(exercicios, tempoDisponivel) {
   let tempoAcumulado = 0;

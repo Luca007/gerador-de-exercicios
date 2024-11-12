@@ -1,5 +1,8 @@
+// Exportar o loader
+export const loader = document.getElementById('loader');
+
 // Função para exibir alerta e fechar ao clicar
-function exibirAlerta(tipo, mensagem) {
+export function exibirAlerta(tipo, mensagem) {
     const tipos = {
       sucesso: {
         bgColor: 'bg-green-100 dark:bg-green-900',
@@ -67,27 +70,28 @@ function exibirAlerta(tipo, mensagem) {
 
 
 // Função para embaralhar arrays
-function embaralharArray(array) {
+export function embaralharArray(array) {
     return array.sort(() => Math.random() - 0.5);
-  }
+}
   
-  // Função para remover seções existentes
-  function removeExistingSections() {
+
+// Função para remover seções existentes
+export function removeExistingSections() {
     const existingLogin = document.getElementById('login-section');
     if (existingLogin) existingLogin.remove();
-  
+
     const existingAdmin = document.getElementById('admin-section');
     if (existingAdmin) existingAdmin.remove();
-  
+
     const existingManage = document.getElementById('manage-section');
     if (existingManage) existingManage.remove();
-  
+
     const existingEdit = document.getElementById('edit-section');
     if (existingEdit) existingEdit.remove();
 }
 
 // Função para aplicar máscaras de entrada
-function applyInputMasks() {
+export function applyInputMasks() {
     // Máscara para o campo 'Tempo (segundos)' no formulário de administração
     $('#tempo-admin').inputmask('integer', {
       rightAlign: false,

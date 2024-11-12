@@ -1,3 +1,9 @@
+import { db } from './firebase.js';
+import { createAdminInterface } from './admin.js';
+import { exibirAlerta, removeExistingSections, applyInputMasks, loader } from './utils.js';
+import { collection, getDocs, deleteDoc, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js';
+
+
 // Function to create the exercise management interface
 function criarGerenciamentoExercicios() {
     // Remover seções existentes
@@ -36,34 +42,38 @@ function criarGerenciamentoExercicios() {
     buscarEExibirExercicios();
 }
 
-function buscarEExibirExercicios() {
+async function buscarEExibirExercicios() {
     const exercisesContainer = document.getElementById('exercises-container');
     
     // Limpar conteúdo anterior
     exercisesContainer.innerHTML = '';
-  
+
     // Mostrar o loader padrão
     loader.style.display = 'flex';
-  
-    // Buscar exercícios do Firestore
-    db.collection('exercicios').get()
-      .then((querySnapshot) => {
+
+    try {
+        // Referência à coleção 'exercicios'
+        const exerciciosRef = collection(db, 'exercicios');
+
+        // Obter os documentos da coleção
+        const querySnapshot = await getDocs(exerciciosRef);
+
         const exercisesByCategory = {};
-  
-        querySnapshot.forEach((doc) => {
-          const exercise = doc.data();
-          exercise.id = doc.id; // Armazenar o ID do documento
-          const category = exercise.categoria || 'Sem Categoria';
-  
-          if (!exercisesByCategory[category]) {
-            exercisesByCategory[category] = [];
-          }
-          exercisesByCategory[category].push(exercise);
+
+        querySnapshot.forEach((docSnapshot) => {
+            const exercise = docSnapshot.data();
+            exercise.id = docSnapshot.id; // Armazenar o ID do documento
+            const category = exercise.categoria || 'Sem Categoria';
+
+            if (!exercisesByCategory[category]) {
+                exercisesByCategory[category] = [];
+            }
+            exercisesByCategory[category].push(exercise);
         });
-  
+
         // Esconder o loader padrão
         loader.style.display = 'none';
-  
+
         // Exibir exercícios agrupados por categoria
         for (const category in exercisesByCategory) {
           const sectionDiv = document.createElement('div');
@@ -200,39 +210,37 @@ function buscarEExibirExercicios() {
           // Adicionar a seção ao exercisesContainer, não ao manageSection
           exercisesContainer.appendChild(sectionDiv);
         }
-      })
-      .catch((error) => {
+      }
+      catch (error) {
         console.error('Erro ao obter exercícios:', error);
         // Esconder o loader padrão
         loader.style.display = 'none';
         exercisesContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar exercícios.</div>';
-      });
-}
-
-
-function deletarExercicio(exerciseId) {
-    if (confirm('Tem certeza que deseja deletar este exercício?')) {
-      // Mostrar o loader
-      loader.style.display = 'flex';
-  
-      db.collection('exercicios').doc(exerciseId).delete()
-        .then(() => {
-          exibirAlerta('sucesso', 'Exercício deletado com sucesso.');
-          // Esconder o loader
-          loader.style.display = 'none';
-          // Atualizar a lista de exercícios
-          buscarEExibirExercicios();
-        })
-        .catch((error) => {
-          console.error('Erro ao deletar exercício:', error);
-          exibirAlerta('erro', 'Erro ao deletar exercício.');
-  
-          // Esconder o loader
-          loader.style.display = 'none';
-        });
     }
 }
 
+
+async function deletarExercicio(exerciseId) {
+    if (confirm('Tem certeza que deseja deletar este exercício?')) {
+        // Mostrar o loader
+        loader.style.display = 'flex';
+
+        try {
+            await deleteDoc(doc(db, 'exercicios', exerciseId));
+            exibirAlerta('sucesso', 'Exercício deletado com sucesso.');
+            // Esconder o loader
+            loader.style.display = 'none';
+            // Atualizar a lista de exercícios
+            buscarEExibirExercicios();
+        } catch (error) {
+            console.error('Erro ao deletar exercício:', error);
+            exibirAlerta('erro', 'Erro ao deletar exercício.');
+
+            // Esconder o loader
+            loader.style.display = 'none';
+        }
+    }
+}
 
 function editarExercicio(exercise) {
     // Remover seções existentes
@@ -361,7 +369,7 @@ function editarExercicio(exercise) {
   
     // Manipulador de submissão do formulário
     form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+        e.preventDefault();
   
       // Validação personalizada
       const nome = document.getElementById('nome').value.trim();
@@ -370,6 +378,9 @@ function editarExercicio(exercise) {
       const categoriaEtaria = document.getElementById('categoria-etaria').value;
       const categoria = document.getElementById('categoria').value;
       const nivel = document.getElementById('nivel').value;
+      const repeticoes = document.getElementById('repeticoes').value.trim();
+      const series = document.getElementById('series').value.trim();
+      const tempo = $('#tempo-admin').val().trim();
   
       if (!nome) {
         exibirAlerta('erro', 'Por favor, preencha o campo Nome do Exercício.');
@@ -396,60 +407,48 @@ function editarExercicio(exercise) {
         return;
       }
   
-      // Mostrar o loader
-      loader.style.display = 'flex';
-  
-      const repeticoesVal = document.getElementById('repeticoes').value.replace(/\D/g, '');
-      const seriesVal = document.getElementById('series').value.replace(/\D/g, '');
-      const repeticoes = repeticoesVal ? parseInt(repeticoesVal) : null;
-      const series = seriesVal ? parseInt(seriesVal) : null;
-      const tempoVal = document.getElementById('tempo-admin').value.replace(/\D/g, '');
-      const tempo = tempoVal ? parseInt(tempoVal) : null;
-  
-      if (!tempo && (!repeticoes || !series)) {
-        exibirAlerta('erro', 'Preencha o Tempo ou as Séries e Repetições.');
-        loader.style.display = 'none';
-        return;
-      }
-  
-      try {
-        await db.collection('exercicios').doc(exercise.id).update({
-          nome,
-          etaria: categoriaEtaria,
-          explicacao,
-          impulso,
-          repeticoes,
-          series,
-          duracao: tempo,
-          categoria,
-          nivel
+    // Mostrar o loader
+    loader.style.display = 'flex';
+
+    try {
+        const exercicioRef = doc(db, 'exercicios', exercise.id);
+
+        await updateDoc(exercicioRef, {
+            nome,
+            etaria: categoriaEtaria,
+            explicacao,
+            impulso,
+            repeticoes,
+            series,
+            duracao: tempo,
+            categoria,
+            nivel
         });
         exibirAlerta('sucesso', 'Exercício atualizado com sucesso!');
-  
+
         // Retornar à lista de exercícios após atualização
         setTimeout(() => {
-          criarGerenciamentoExercicios();
-          // Esconder o loader após os 2000 ms
-          loader.style.display = 'none';
+            criarGerenciamentoExercicios();
+            // Esconder o loader após os 20 ms
+            loader.style.display = 'none';
         }, 20);
-  
-      } catch (error) {
+
+    } catch (error) {
         exibirAlerta('erro', 'Erro ao atualizar exercício.');
         console.error('Erro ao atualizar exercício:', error);
-    
+
         // Esconder o loader
         loader.style.display = 'none';
-      }
-  
-      // Limpar a mensagem após algum tempo
-      setTimeout(() => {
+    }
+
+    // Limpar a mensagem após algum tempo
+    setTimeout(() => {
         adminMessage.innerHTML = '';
-      }, 3000);
-    });
+    }, 3000);
+});
 }
 
-
-function adicionarBotaoGerenciarExercicios() {
+export function adicionarBotaoGerenciarExercicios() {
     const manageButton = document.createElement('button');
     manageButton.id = 'manage-exercises-button';
     manageButton.innerText = 'Gerenciar Exercícios';
@@ -464,4 +463,3 @@ function adicionarBotaoGerenciarExercicios() {
       adminSection.appendChild(manageButton);
     }
 }
-  
