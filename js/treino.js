@@ -1,5 +1,4 @@
-import { db } from './firebase.js';
-import { collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js';
+import { obterExercicios } from './firestore.js';
 import { embaralharArray, exibirAlerta, loader } from './utils.js';
 
 // Elementos do DOM relacionados ao treino
@@ -10,29 +9,29 @@ const resultadoDiv = document.getElementById('resultado');
 treinoForm.addEventListener('submit', gerarTreino);
 
 function gerarTreino(e) {
-    e.preventDefault();
-  
-    const tempoTotalInput = document.getElementById('tempo-disponivel');
-    const tempoTotal = parseInt(tempoTotalInput.value.replace(/\D/g, ''));
-  
-    if (!tempoTotal || isNaN(tempoTotal)) {
-      exibirAlerta('erro', 'Por favor, preencha o campo Tempo disponível.');
-      return;
-    }
-  
-    // Obter o nível selecionado
-    const nivelElemento = document.querySelector('#optionsContainer1 .option.selected');
-    const nivel = nivelElemento ? nivelElemento.getAttribute('data-value') : 'todos';
-  
-    // Obter a categoria etária selecionada
-    const categoriaEtariaElemento = document.querySelector('#optionsContainer2 .option.selected');
-    const categoriaEtaria = categoriaEtariaElemento ? categoriaEtariaElemento.getAttribute('data-value') : 'todos';
-  
-    // Chamar a função para montar o treino
-    montarTreino(tempoTotal, nivel, categoriaEtaria);
+  e.preventDefault();
+
+  const tempoTotalInput = document.getElementById('tempo-disponivel');
+  const tempoTotalVal = tempoTotalInput.value.replace(/\D/g, '');
+  const tempoTotal = parseInt(tempoTotalVal);
+
+  if (!tempoTotalVal || isNaN(tempoTotal)) {
+    exibirAlerta('erro', 'Por favor, preencha o campo Tempo disponível.');
+    return;
+  }
+
+  // Obter o nível selecionado
+  const nivelElemento = document.querySelector('#optionsContainer1 .option.selected');
+  const nivel = nivelElemento ? nivelElemento.getAttribute('data-value') : 'todos';
+
+  // Obter a categoria etária selecionada
+  const categoriaEtariaElemento = document.querySelector('#optionsContainer2 .option.selected');
+  const categoriaEtaria = categoriaEtariaElemento ? categoriaEtariaElemento.getAttribute('data-value') : 'todos';
+
+  // Chamar a função para montar o treino
+  montarTreino(tempoTotal, nivel, categoriaEtaria);
 }
 
-      
 async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
   resultadoDiv.innerHTML = '';
 
@@ -40,46 +39,58 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
   loader.style.display = 'flex';
 
   // Definir as proporções de tempo para cada categoria
-  const proporcaoAquecimento = 10 / 90;
-  const proporcaoFortalecimento = 20 / 90;
-  const proporcaoAlongamento = 20 / 90;
-  const proporcaoEquipamento = 35 / 90;
-  const proporcaoCooldown = 5 / 90;
+  const proporcoes = {
+    Aquecimento: 10 / 90,
+    Fortalecimento: 20 / 90,
+    Alongamento: 20 / 90,
+    Equipamento: 35 / 90,
+    CoolDown: 5 / 90
+  };
 
-  const tempoAquecimento = Math.floor(tempoTotal * proporcaoAquecimento);
-  const tempoFortalecimento = Math.floor(tempoTotal * proporcaoFortalecimento);
-  const tempoAlongamento = Math.floor(tempoTotal * proporcaoAlongamento);
-  const tempoEquipamento = Math.floor(tempoTotal * proporcaoEquipamento);
-  const tempoCooldown = tempoTotal - tempoAquecimento - tempoFortalecimento - tempoAlongamento - tempoEquipamento;
+  const temposCategoria = {};
+  let tempoTotalCalculado = 0;
+
+  // Calcular o tempo para cada categoria
+  for (const categoria in proporcoes) {
+    const tempoCategoria = Math.floor(tempoTotal * proporcoes[categoria]);
+    temposCategoria[categoria] = tempoCategoria;
+    tempoTotalCalculado += tempoCategoria;
+  }
+
+  // Ajustar o tempo do CoolDown para compensar possíveis arredondamentos
+  temposCategoria['CoolDown'] += tempoTotal - tempoTotalCalculado;
 
   // Converter tempos disponíveis para segundos
-  const tempoAquecimentoSeg = tempoAquecimento * 60;
-  const tempoFortalecimentoSeg = tempoFortalecimento * 60;
-  const tempoAlongamentoSeg = tempoAlongamento * 60;
-  const tempoEquipamentoSeg = tempoEquipamento * 60;
-  const tempoCooldownSeg = tempoCooldown * 60;
+  const temposEmSegundos = {};
+  for (const categoria in temposCategoria) {
+    temposEmSegundos[categoria] = temposCategoria[categoria] * 60;
+  }
 
   try {
     // Obter exercícios de cada categoria
-    const aquecimentoExercicios = await obterExercicios('Aquecimento', nivel, categoriaEtaria);
-    const fortalecimentoExercicios = await obterExercicios('Fortalecimento', nivel, categoriaEtaria);
-    const alongamentoExercicios = await obterExercicios('Alongamento', nivel, categoriaEtaria);
-    const equipamentoExercicios = await obterExercicios('Equipamento', nivel, categoriaEtaria);
-    const cooldownExercicios = await obterExercicios('CoolDown', nivel, categoriaEtaria);
+    const categorias = ['Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'];
+    const treinos = {};
 
-    // Selecionar exercícios que se encaixem no tempo disponível
-    const treinoAquecimento = selecionarExercicios(aquecimentoExercicios, tempoAquecimentoSeg);
-    const treinoFortalecimento = selecionarExercicios(fortalecimentoExercicios, tempoFortalecimentoSeg);
-    const treinoAlongamento = selecionarExercicios(alongamentoExercicios, tempoAlongamentoSeg);
-    const treinoEquipamento = selecionarExercicios(equipamentoExercicios, tempoEquipamentoSeg);
-    const treinoCooldown = selecionarExercicios(cooldownExercicios, tempoCooldownSeg);
+    for (const categoria of categorias) {
+      let exercicios = await obterExercicios({
+        categoria: categoria
+      });
+
+      // Filtrar exercícios no lado do cliente
+      exercicios = exercicios.filter(exercicio => {
+        const nivelMatch = (nivel === 'todos' || exercicio.nivel === 'todos' || exercicio.nivel === nivel);
+        const etariaMatch = (categoriaEtaria === 'todos' || exercicio.etaria === 'todos' || exercicio.etaria === categoriaEtaria);
+        return nivelMatch && etariaMatch;
+      });
+
+      // Selecionar exercícios que se encaixem no tempo disponível
+      treinos[categoria] = selecionarExercicios(exercicios, temposEmSegundos[categoria]);
+    }
 
     // Exibir o treino
-    exibirTreino('Aquecimento', treinoAquecimento, resultadoDiv);
-    exibirTreino('Fortalecimento', treinoFortalecimento, resultadoDiv);
-    exibirTreino('Alongamento', treinoAlongamento, resultadoDiv);
-    exibirTreino('Equipamento', treinoEquipamento, resultadoDiv);
-    exibirTreino('CoolDown', treinoCooldown, resultadoDiv);
+    for (const categoria of categorias) {
+      exibirTreino(categoria, treinos[categoria], resultadoDiv);
+    }
 
     // Esconder o loader
     loader.style.display = 'none';
@@ -93,22 +104,6 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
   }
 }
 
-async function obterExercicios(categoria, nivel, categoriaEtaria) {
-    let q = query(collection(db, 'exercicios'), where('categoria', 'in', [categoria, 'nenhum']));
-  
-    if (nivel !== 'todos') {
-      q = query(q, where('nivel', '==', nivel));
-    }
-  
-    if (categoriaEtaria !== 'todos') {
-      q = query(q, where('etaria', '==', categoriaEtaria));
-    }
-  
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data());
-}
-
-
 function selecionarExercicios(exercicios, tempoDisponivel) {
   let tempoAcumulado = 0;
   const listaSelecionada = [];
@@ -117,9 +112,10 @@ function selecionarExercicios(exercicios, tempoDisponivel) {
   exercicios = embaralharArray(exercicios);
 
   for (let exercicio of exercicios) {
-    if (tempoAcumulado + exercicio.duracao <= tempoDisponivel) {
+    const duracaoExercicio = exercicio.duracao || 0;
+    if (tempoAcumulado + duracaoExercicio <= tempoDisponivel) {
       listaSelecionada.push(exercicio);
-      tempoAcumulado += exercicio.duracao;
+      tempoAcumulado += duracaoExercicio;
     }
     if (tempoAcumulado >= tempoDisponivel) break;
   }
@@ -148,15 +144,14 @@ function exibirTreino(titulo, exercicios, elemento) {
       exerciseName.className = 'exercise-name';
       exerciseName.innerText = exercicio.nome;
 
-      // Separador
-      const separator = document.createTextNode(' - ');
-
       // Adicionar nome ao título
       titleDuration.appendChild(exerciseName);
-      titleDuration.appendChild(separator);
 
       // Duração ou Séries/Repetições
       if (exercicio.duracao) {
+        const separator = document.createTextNode(' - ');
+        titleDuration.appendChild(separator);
+
         const exerciseDuration = document.createElement('span');
         exerciseDuration.className = 'exercise-duration';
 
@@ -178,6 +173,9 @@ function exibirTreino(titulo, exercicios, elemento) {
         // Adicionar ao título
         titleDuration.appendChild(exerciseDuration);
       } else if (exercicio.series && exercicio.repeticoes) {
+        const separator = document.createTextNode(' - ');
+        titleDuration.appendChild(separator);
+
         const seriesReps = document.createElement('span');
         seriesReps.className = 'exercise-series-reps';
         seriesReps.innerText = `${exercicio.series} séries de ${exercicio.repeticoes} repetições`;
@@ -204,7 +202,7 @@ function exibirTreino(titulo, exercicios, elemento) {
       }
 
       // Repetições
-      if (exercicio.repeticoes) {
+      if (exercicio.repeticoes && !exercicio.duracao) {
         const repeticoesPara = document.createElement('p');
         repeticoesPara.className = 'exercise-repeticoes';
         repeticoesPara.innerHTML = `<strong>Repetições:</strong> ${exercicio.repeticoes}`;
@@ -212,7 +210,7 @@ function exibirTreino(titulo, exercicios, elemento) {
       }
 
       // Séries
-      if (exercicio.series) {
+      if (exercicio.series && !exercicio.duracao) {
         const seriesPara = document.createElement('p');
         seriesPara.className = 'exercise-series';
         seriesPara.innerHTML = `<strong>Séries:</strong> ${exercicio.series}`;
