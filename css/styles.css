@@ -284,15 +284,27 @@ h2 {
 }
 
 /* Responsividade */
-@media (max-width: 1200px) {
+@media (max-width: 1500px) {
   .exercise-table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
   }
 
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .explanation-cell {
     min-width: 300px;
+  }
+
+  #login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 }
 
@@ -303,7 +315,7 @@ h2 {
 
   .list-group-item {
     padding: 15px;
-  }
+    }
 
   .exercise-title {
     font-size: 1.2em;
@@ -324,6 +336,29 @@ h2 {
 
   .form-group {
     margin-bottom: 15px;
+    width: 83dvw;
+  }
+
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #manage-exercises-button {
+    margin-top: unset !important;
+    margin-bottom: 10dvh !important;
+  }
+
+  #login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  [role=alert] {
+    left: 5% !important;
+    top: 1dvh !important;
   }
 }
 

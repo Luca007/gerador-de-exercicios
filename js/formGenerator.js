@@ -1,6 +1,6 @@
 export function criarFormulario(campos, valoresIniciais = {}) {
     const form = document.createElement('form');
-    form.className = 'mx-auto';
+    form.className = 'mx-auto form-container';
     form.style.maxWidth = '500px';
   
     campos.forEach(field => {
