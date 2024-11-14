@@ -1,0 +1,122 @@
+.options-container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 80%;
+    max-width: 500px;
+    margin-bottom: 5dvh;
+    margin-top: 2dvh;
+}
+.hover-effect-top, .hover-effect-bottom {
+    position: absolute;
+    left: 0;
+    width: 0;
+    height: 0;
+    background-color: rgba(80, 80, 80, 0.5);
+    transition: all 0.6s ease;
+    pointer-events: none;
+    border-radius: 8px;
+}
+.hover-effect-top {
+    top: 0;
+    height: calc(50% - 20px);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+.hover-effect-bottom {
+    bottom: 0;
+    height: calc(50% - 20px);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+.selection-indicator {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0;
+    height: 0;
+    background: rgba(128, 0, 128, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 100, 200, 0.7), 0 0 20px rgba(255, 20, 147, 0.5);
+    transition: all 1s ease;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+.option {
+    position: relative;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, color 0.3s ease;
+    flex: 1;
+    text-align: center;
+    color: #555555;
+    z-index: 1;
+    background-color: transparent;
+}
+.option.selected {
+    transform: scale(1.05);
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(150, 0, 150, 0.9), rgba(0, 100, 200, 0.9), rgba(255, 20, 147, 0.9));
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .options-container {
+        flex-direction: column;
+        width: 90%;
+    }
+
+    .option {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .option:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Ajustes para as barras laterais */
+    .hover-effect-top, .hover-effect-bottom {
+        position: absolute;
+        width: 8px; /* Largura fixa para as barras laterais */
+        background-color: rgba(80, 80, 80, 0.5);
+        transition: all 0.6s ease;
+        pointer-events: none;
+    }
+    .hover-effect-top {
+        /* Barra esquerda */
+        border-radius: 0 8px 8px 0;
+        left: 0;
+        top: 0;
+        height: 0; /* Será ajustado via JS */
+    }
+    .hover-effect-bottom {
+        /* Barra direita */
+        border-radius: 8px 0 0 8px;
+        right: 0;
+        top: 0;
+        height: 0; /* Será ajustado via JS */
+    }
+
+    .selection-indicator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        background: rgba(128, 0, 128, 0.3);
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 100, 200, 0.7), 0 0 20px rgba(255, 20, 147, 0.5);
+        transition: all 1s ease;
+        pointer-events: none;
+    }
+}

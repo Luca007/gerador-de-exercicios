@@ -9,55 +9,70 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Fonte Roboto -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <!-- Seu CSS personalizado -->
   <link rel="stylesheet" href="css/styles.css">
-  <!-- CSS do formulário de login -->
-  <!-- <link rel="stylesheet" href="css/login.css"> -->
+  <link rel="stylesheet" href="css/loader.css">
+  <link rel="stylesheet" href="css/select.css">
 </head>
 <body>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="/">Gerador de Treinos</a>
+    <a class="navbar-brand" href="/gerador-de-exercicios/">Gerador de Treinos</a>
   </nav>
 
   <div class="container mt-5">
     <h1 class="text-center mb-4">Gerador de Treinos</h1>
 
     <!-- Formulário para gerar treinos -->
-    <form id="treino-form" class="mx-auto" style="max-width: 500px;">
+    <form id="treino-form" class="mx-auto treino-form">
       <div class="form-group">
         <label for="tempo-disponivel">Tempo disponível (min):</label>
-        <input type="text" class="form-control" id="tempo-disponivel" name="tempo" required>
+        <input type="text" class="form-control" id="tempo-disponivel" name="tempo">
       </div>
 
-      <div class="form-group">
-        <label for="nivel">Nível:</label>
-        <select class="form-control" id="nivel" name="nivel" required>
-          <option value="iniciante">Iniciante</option>
-          <option value="intermediario">Intermediário</option>
-          <option value="avancado">Avançado</option>
-        </select>
+      <div class="options-container" id="optionsContainer1">
+        <div class="selection-indicator" id="selectionIndicator1"></div>
+        <div class="hover-effect-top" id="hoverEffectTop1"></div>
+        <div class="hover-effect-bottom" id="hoverEffectBottom1"></div>
+        <div class="option selected" data-value="todos">Todos</div>
+        <div class="option" data-value="iniciante">Iniciante</div>
+        <div class="option" data-value="intermediario">Intermediário</div>
+        <div class="option" data-value="avancado">Avançado</div>
+      </div>
+      <div class="options-container" id="optionsContainer2">
+          <div class="selection-indicator" id="selectionIndicator2"></div>
+          <div class="hover-effect-top" id="hoverEffectTop2"></div>
+          <div class="hover-effect-bottom" id="hoverEffectBottom2"></div>
+          <div class="option selected" data-value="todos">Todos</div>
+          <div class="option" data-value="criança">Criança</div>
+          <div class="option" data-value="adulto">Adulto</div>
+          <div class="option" data-value="idoso">Idoso</div>
       </div>
 
-      <div class="form-group">
-        <label for="categoria-etaria">Categoria Etária:</label>
-        <select class="form-control" id="categoria-etaria" name="categoria-etaria" required>
-          <option value="todos">Todos</option>
-          <option value="criança">Criança</option>
-          <option value="adulto">Adulto</option>
-          <option value="idoso">Idoso</option>
-        </select>
-      </div>
-      
-
-      <button type="submit" class="btn btn-primary btn-block">Gerar Treino</button>
+      <button type="submit" class="btn btn-primary btn-block form-btn">Gerar Treino</button>
     </form>
 
     <!-- Loader -->
-    <div id="loader" style="display: none;">
-      <div class="spinner"></div>
-    </div>
-
+    <div class="loading-container" id="loader">
+      <div class="overlay">
+          <div class="loading-container">
+              <div class="pyramid-loader">
+                  <div class="wrapper">
+                      <span class="side side1"></span>
+                      <span class="side side2"></span>
+                      <span class="side side3"></span>
+                      <span class="side side4"></span>
+                      <span class="shadow"></span>
+                  </div>
+              </div>
+              <div class="loader"></div>
+          </div>
+      </div> 
+    </div>       
 
     <!-- Div para exibir o resultado -->
     <div id="resultado" class="mt-5"></div>
@@ -68,64 +83,20 @@
     </div>
   </div>
 
-  <!-- Formulário de Login (inicialmente oculto) -->
-  <div id="login-container" style="display: none;">
-    <form id="login-form">
-      <div class="svgContainer">
-        <div>
-          <!-- SVG animado -->
-          <!-- ... Coloque aqui o código SVG completo fornecido -->
-          <!-- Como o código SVG é muito extenso, certifique-se de copiá-lo integralmente do seu código original -->
-          <!-- Início do SVG -->
-          <svg class="mySVG" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-            <!-- Seu código SVG aqui -->
-            <!-- Certifique-se de incluir todo o conteúdo do SVG sem omissões -->
-          </svg>
-          <!-- Fim do SVG -->
-        </div>
-      </div>
-
-      <div class="inputGroup inputGroup1">
-        <label for="loginEmail" id="loginEmailLabel">Email</label>
-        <input type="email" id="loginEmail" maxlength="254" />
-        <p class="helper helper1">email@dominio.com</p>
-      </div>
-      <div class="inputGroup inputGroup2">
-        <label for="loginPassword" id="loginPasswordLabel">Senha</label>
-        <input type="password" id="loginPassword" />
-        <label id="showPasswordToggle" for="showPasswordCheck">Mostrar
-          <input id="showPasswordCheck" type="checkbox" />
-          <div class="indicator"></div>
-        </label>
-      </div>
-      <div class="inputGroup inputGroup3">
-        <button id="login">Entrar</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Importando o jQuery, GSAP, InputMask e Bootstrap JS -->
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
   <!-- GSAP para animações -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/MorphSVGPlugin.min.js"></script>
+
   <!-- InputMask plugin -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js"></script>
+
   <!-- Bootstrap JS -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-  <!-- Firebase SDKs -->
-  <!-- Firebase App -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-  <!-- Firebase Auth -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-  <!-- Firebase Firestore -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
-
-  <!-- Seu script principal -->
-  <script src="js/app.js"></script>
-  <!-- Script do formulário de login -->
-  <!-- <script src="js/login.js"></script> -->
+  <!-- Scripts JavaScript -->
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
