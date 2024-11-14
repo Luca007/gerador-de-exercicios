@@ -29,3 +29,8 @@ $(document).ready(function() {
     hoverEffectBottomId: 'hoverEffectBottom2'
   });
 });
+
+window.addEventListener('load', function() {
+  // Esconde o loader após o carregamento da página
+  document.getElementById('loader').style.display = 'none';
+});
