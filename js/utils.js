@@ -10,6 +10,7 @@ export function exibirAlerta(tipo, mensagem) {
       textColor: 'text-green-900 dark:text-green-100',
       hoverColor: 'hover:bg-green-200 dark:hover:bg-green-800',
       iconColor: 'text-green-600',
+      progressBarColor: 'bg-green-500',
     },
     info: {
       bgColor: 'bg-blue-100 dark:bg-blue-900',
@@ -17,6 +18,7 @@ export function exibirAlerta(tipo, mensagem) {
       textColor: 'text-blue-900 dark:text-blue-100',
       hoverColor: 'hover:bg-blue-200 dark:hover:bg-blue-800',
       iconColor: 'text-blue-600',
+      progressBarColor: 'bg-blue-500',
     },
     aviso: {
       bgColor: 'bg-yellow-100 dark:bg-yellow-900',
@@ -24,6 +26,7 @@ export function exibirAlerta(tipo, mensagem) {
       textColor: 'text-yellow-900 dark:text-yellow-100',
       hoverColor: 'hover:bg-yellow-200 dark:hover:bg-yellow-800',
       iconColor: 'text-yellow-600',
+      progressBarColor: 'bg-yellow-500',
     },
     erro: {
       bgColor: 'bg-red-100 dark:bg-red-900',
@@ -31,13 +34,14 @@ export function exibirAlerta(tipo, mensagem) {
       textColor: 'text-red-900 dark:text-red-100',
       hoverColor: 'hover:bg-red-200 dark:hover:bg-red-800',
       iconColor: 'text-red-600',
+      progressBarColor: 'bg-red-500',
     },
   };
 
   const tipoAlert = tipos[tipo] || tipos.info;
 
   const alertaDiv = document.createElement('div');
-  alertaDiv.className = `space-y-2 p-4 ${tipoAlert.bgColor} ${tipoAlert.borderColor} ${tipoAlert.textColor} rounded-lg flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-105 ${tipoAlert.hoverColor} shadow-lg`;
+  alertaDiv.className = `space-y-2 p-4 ${tipoAlert.bgColor} ${tipoAlert.borderColor} ${tipoAlert.textColor} rounded-lg flex flex-col items-center justify-center transition duration-300 ease-in-out transform hover:scale-105 ${tipoAlert.hoverColor} shadow-lg`;
   alertaDiv.role = 'alert';
   alertaDiv.style.position = 'fixed';
   alertaDiv.style.top = '2vh';
@@ -53,8 +57,13 @@ export function exibirAlerta(tipo, mensagem) {
   `;
 
   alertaDiv.innerHTML = `
-    ${svgIcon}
-    <p class="text-sm font-semibold">${mensagem}</p>
+    <div class="flex items-center">
+      ${svgIcon}
+      <p class="text-sm font-semibold">${mensagem}</p>
+    </div>
+    <div class="w-full h-1 bg-gray-300 mt-2 rounded-full overflow-hidden">
+      <div class="h-full progress-bar ${tipoAlert.progressBarColor}"></div>
+    </div>
   `;
 
   alertaDiv.onclick = function () {
@@ -63,6 +72,16 @@ export function exibirAlerta(tipo, mensagem) {
 
   document.body.appendChild(alertaDiv);
 
+  const progressBar = alertaDiv.querySelector('.progress-bar');
+  progressBar.style.width = '0%';
+  progressBar.style.transition = 'width 5s linear';
+
+  // Começa a barra de progresso
+  setTimeout(() => {
+    progressBar.style.width = '100%';
+  }, 10);
+
+  // Esconde o alerta após 5 segundos
   setTimeout(() => {
     alertaDiv.style.display = 'none';
   }, 5000);
