@@ -86,7 +86,7 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
       // Selecionar exercícios que se encaixem no tempo disponível
       treinos[categoria] = selecionarExercicios(exercicios, temposEmSegundos[categoria]);
     }
-
+    
     // Exibir o treino
     for (const categoria of categorias) {
       exibirTreino(categoria, treinos[categoria], resultadoDiv);

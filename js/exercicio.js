@@ -129,7 +129,7 @@ async function buscarEExibirExercicios() {
         'Repetições',
         'Séries',
         'Tempo',
-        'Impulso (Equipamento)',
+        'Equipamento',
         'Categoria Etária',
         'Nível',
         'Ações'
@@ -247,6 +247,7 @@ async function excluirExercicio(exerciseId) {
   }
 }
 
+// Função para editar exercício
 function editarExercicio(exercise) {
   // Remover seções existentes
   removeExistingSections();
@@ -268,20 +269,18 @@ function editarExercicio(exercise) {
     { label: 'Séries:', id: 'series', type: 'text', required: false },
     { label: 'Tempo (segundos):', id: 'tempo-admin', type: 'text', required: false },
     {
-      label: 'Impulso (Equipamento):',
+      label: 'Equipamento:',
       id: 'impulso',
-      type: 'select',
+      type: 'checkboxGroup',
       options: ['todos', 'nenhum', 'Lira', 'Solo', 'Tecido', 'Trapézio'],
-      required: true,
-      multiple: true
+      required: true
     },
     {
       label: 'Categoria Etária:',
       id: 'etaria',
-      type: 'select',
+      type: 'checkboxGroup',
       options: ['todos', 'criança', 'adulto', 'idoso'],
-      required: true,
-      multiple: true
+      required: true
     },
     {
       label: 'Categoria:',
@@ -366,6 +365,51 @@ function editarExercicio(exercise) {
   // Atualizar a obrigatoriedade inicial
   updateFieldRequirements();
 
+  // Função para configurar a lógica dos grupos de checkboxes
+  function setupCheckboxGroupLogic(fieldId) {
+    const checkboxes = document.querySelectorAll(`input[name="${fieldId}"]`);
+    const todosCheckbox = document.querySelector(`input[name="${fieldId}"][value="todos"]`);
+    const nenhumCheckbox = document.querySelector(`input[name="${fieldId}"][value="nenhum"]`);
+    const otherCheckboxes = Array.from(checkboxes).filter(cb => cb !== todosCheckbox && cb !== nenhumCheckbox);
+  
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        if (checkbox === todosCheckbox && todosCheckbox && todosCheckbox.checked) {
+          // 'todos' foi marcado, marcar todas as outras opções, exceto 'nenhum'
+          otherCheckboxes.forEach(cb => cb.checked = true);
+          if (nenhumCheckbox) nenhumCheckbox.checked = false;
+        } else if (checkbox === nenhumCheckbox && nenhumCheckbox && nenhumCheckbox.checked) {
+          // 'nenhum' foi marcado, desmarcar todas as outras opções
+          checkboxes.forEach(cb => {
+            if (cb !== nenhumCheckbox) {
+              cb.checked = false;
+            }
+          });
+          if (todosCheckbox) todosCheckbox.checked = false;
+        } else if (checkbox !== todosCheckbox && checkbox !== nenhumCheckbox) {
+          // Outra opção foi marcada ou desmarcada
+          if (otherCheckboxes.every(cb => cb.checked)) {
+            // Todas as opções estão marcadas, marcar 'todos' e desmarcar 'nenhum'
+            if (todosCheckbox) todosCheckbox.checked = true;
+            if (nenhumCheckbox) nenhumCheckbox.checked = false;
+          } else {
+            // Nem todas as opções estão marcadas, desmarcar 'todos'
+            if (todosCheckbox) todosCheckbox.checked = false;
+          }
+          // Se alguma opção está marcada, desmarcar 'nenhum'
+          if (otherCheckboxes.some(cb => cb.checked)) {
+            if (nenhumCheckbox) nenhumCheckbox.checked = false;
+          }
+        }
+      });
+    });
+  }
+  
+
+  // Após o formulário ser adicionado ao DOM
+  setupCheckboxGroupLogic('impulso');
+  setupCheckboxGroupLogic('etaria');
+
   // Manipulador de submissão do formulário
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -373,8 +417,13 @@ function editarExercicio(exercise) {
     // Validação personalizada
     const nome = $('#nome').val().trim();
     const explicacao = $('#explicacao').val().trim();
-    const impulsoSelectedOptions = $('#impulso').val() || [];
-    const categoriaEtariaSelectedOptions = $('#etaria').val() || [];
+
+    const impulsoCheckboxes = document.querySelectorAll('input[name="impulso"]:checked');
+    const impulsoSelectedOptions = Array.from(impulsoCheckboxes).map(cb => cb.value);
+
+    const categoriaEtariaCheckboxes = document.querySelectorAll('input[name="etaria"]:checked');
+    const categoriaEtariaSelectedOptions = Array.from(categoriaEtariaCheckboxes).map(cb => cb.value);
+
     const categoria = $('#categoria').val();
     const nivel = $('#nivel').val();
     const repeticoes = $('#repeticoes').val().replace(/\D/g, '') || null;
@@ -435,8 +484,8 @@ function editarExercicio(exercise) {
     }
 
     // Obter todas as opções disponíveis para impulso e categoria etária
-    const impulsoOptions = $('#impulso option').map(function () { return $(this).val(); }).get();
-    const categoriaEtariaOptions = $('#etaria option').map(function () { return $(this).val(); }).get();
+    const impulsoOptions = [...document.querySelectorAll(`input[name="impulso"]`)].map(cb => cb.value);
+    const categoriaEtariaOptions = [...document.querySelectorAll(`input[name="etaria"]`)].map(cb => cb.value);
 
     // Tratar seleção de todas as opções
     const impulso = handleAllSelected(impulsoSelectedOptions, impulsoOptions, 'todos');
