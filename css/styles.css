@@ -248,6 +248,8 @@ h2 {
 
 .exercise-table td {
   color: #E0E0E0;
+  vertical-align: middle;
+  height: fit-content;
 }
 
 .explanation-cell {
@@ -289,6 +291,20 @@ h2 {
   border-color: #e65c5c;
 }
 
+/* Contêiner de ações */
+.actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5dvh;
+  align-items: stretch;
+  padding: 10px 0;
+}
+
+/* Botões dentro do contêiner de ações */
+.actions-container button {
+  width: 110%;
+}
+
 /* Responsividade */
 @media (max-width: 1500px) {
   .exercise-table {
@@ -321,7 +337,7 @@ h2 {
 
   .list-group-item {
     padding: 15px;
-    }
+  }
 
   .exercise-title {
     font-size: 1.2em;
@@ -330,6 +346,10 @@ h2 {
   .btn {
     width: 100%;
     margin-bottom: 10px;
+  }
+
+  .actions-container {
+    gap: 3dvh;
   }
 
   .section-title {

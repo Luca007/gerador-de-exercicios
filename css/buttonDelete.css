@@ -1,0 +1,58 @@
+.delete-button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    background: #e62222;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    overflow: hidden;
+    transition: background 200ms;
+    position: relative;
+  }
+  
+  .delete-button .text {
+    color: white;
+    font-weight: bold;
+    transition: transform 200ms, opacity 200ms;
+  }
+  
+  .delete-button .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid #991717;
+    padding-left: 6px;
+    margin-left: 10px;
+    margin-right: -16px;
+    transition: transform 200ms;
+  }
+  
+  .delete-button .icon i {
+    font-size: 16px;
+    color: #eee;
+    transition: transform 200ms;
+  }
+  
+  .delete-button:hover {
+    background: #ff3636;
+  }
+  
+  .delete-button:hover .text {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  
+  .delete-button:hover .icon {
+    border-left: none;
+    margin-left: 0;
+    transform: translateX(-100%);
+  }
+  
+  .delete-button:focus {
+    outline: none;
+  }
+  
+  .delete-button:active i {
+    transform: scale(0.8);
+  }

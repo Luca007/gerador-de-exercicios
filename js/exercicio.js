@@ -45,6 +45,59 @@ export function criarGerenciamentoExercicios() {
   buscarEExibirExercicios();
 }
 
+function criarBotaoDeletar(exerciseId) {
+  const deleteButton = document.createElement('button');
+  deleteButton.className = 'delete-button noselect';
+  deleteButton.addEventListener('click', () => excluirExercicio(exerciseId));
+
+  // Criar os elementos internos
+  const deleteTextSpan = document.createElement('span');
+  deleteTextSpan.className = 'text';
+  deleteTextSpan.innerText = 'Excluir';
+
+  const deleteIconSpan = document.createElement('span');
+  deleteIconSpan.className = 'icon';
+
+  // Usar o ícone de lixeira do Font Awesome
+  const deleteIcon = document.createElement('i');
+  deleteIcon.className = 'fas fa-trash';
+
+  deleteIconSpan.appendChild(deleteIcon);
+
+  // Montar o botão
+  deleteButton.appendChild(deleteTextSpan);
+  deleteButton.appendChild(deleteIconSpan);
+
+  return deleteButton;
+}
+
+function criarBotaoEditar(exercise) {
+  const editButton = document.createElement('button');
+  editButton.className = 'edit-button noselect';
+  editButton.addEventListener('click', () => editarExercicio(exercise));
+
+  // Criar os elementos internos
+  const editTextSpan = document.createElement('span');
+  editTextSpan.className = 'text';
+  editTextSpan.innerText = 'Editar';
+
+  const editIconSpan = document.createElement('span');
+  editIconSpan.className = 'icon';
+
+  // Usar o ícone de lápis do Font Awesome
+  const editIcon = document.createElement('i');
+  editIcon.className = 'fas fa-pencil-alt';
+
+  editIconSpan.appendChild(editIcon);
+
+  // Montar o botão
+  editButton.appendChild(editTextSpan);
+  editButton.appendChild(editIconSpan);
+
+  return editButton;
+}
+
+
 async function buscarEExibirExercicios() {
   const exercisesContainer = document.getElementById('exercises-container');
 
@@ -190,22 +243,21 @@ async function buscarEExibirExercicios() {
 
         // Ações
         const actionsCell = document.createElement('td');
-        actionsCell.className = 'actions-cell';
+
+        // Criar um contêiner para os botões
+        const actionsContainer = document.createElement('div');
+        actionsContainer.className = 'actions-container';
 
         // Botão Editar
-        const editButton = document.createElement('button');
-        editButton.className = 'btn btn-primary btn-sm mr-2';
-        editButton.innerText = 'Editar';
-        editButton.addEventListener('click', () => editarExercicio(exercise));
-        actionsCell.appendChild(editButton);
+        const editButton = criarBotaoEditar(exercise);
+        actionsContainer.appendChild(editButton);
 
         // Botão Deletar
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'btn btn-danger btn-sm';
-        deleteButton.innerText = 'Deletar';
-        deleteButton.addEventListener('click', () => excluirExercicio(exercise.id));
-        actionsCell.appendChild(deleteButton);
+        const deleteButton = criarBotaoDeletar(exercise.id);
+        actionsContainer.appendChild(deleteButton);
 
+        // Adicionar o contêiner à célula
+        actionsCell.appendChild(actionsContainer);
         row.appendChild(actionsCell);
 
         tbody.appendChild(row);
