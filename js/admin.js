@@ -142,10 +142,36 @@ export function createAdminInterface() {
     { label: 'Repetições:', id: 'repeticoes', type: 'text', required: false },
     { label: 'Séries:', id: 'series', type: 'text', required: false },
     { label: 'Tempo (segundos):', id: 'tempo-admin', type: 'text', required: false },
-    { label: 'Impulso (Equipamento):', id: 'impulso', type: 'select', options: ['nenhum', 'Lira', 'Solo', 'Tecido', 'Trapézio'], required: true },
-    { label: 'Categoria Etária:', id: 'etaria', type: 'select', options: ['todos', 'criança', 'adulto', 'idoso'], required: true },
-    { label: 'Categoria:', id: 'categoria', type: 'select', options: ['Todos', 'Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'], required: true },
-    { label: 'Nível:', id: 'nivel', type: 'select', options: ['todos', 'iniciante', 'intermediario', 'avancado'], required: true },
+    {
+      label: 'Impulso (Equipamento):',
+      id: 'impulso',
+      type: 'select',
+      options: ['todos', 'nenhum', 'Lira', 'Solo', 'Tecido', 'Trapézio'],
+      required: true,
+      multiple: true
+    },
+    {
+      label: 'Categoria Etária:',
+      id: 'etaria',
+      type: 'select',
+      options: ['todos', 'criança', 'adulto', 'idoso'],
+      required: true,
+      multiple: true
+    },
+    {
+      label: 'Categoria:',
+      id: 'categoria',
+      type: 'select',
+      options: ['Todos', 'Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'],
+      required: true
+    },
+    {
+      label: 'Nível:',
+      id: 'nivel',
+      type: 'select',
+      options: ['todos', 'iniciante', 'intermediario', 'avancado'],
+      required: true
+    }
   ];
 
   const form = criarFormulario(fields);
@@ -212,8 +238,8 @@ export function createAdminInterface() {
     // Validação personalizada
     const nome = $('#nome').val().trim();
     const explicacao = $('#explicacao').val().trim();
-    const impulso = $('#impulso').val();
-    const categoriaEtaria = $('#etaria').val();
+    const impulsoSelectedOptions = $('#impulso').val() || [];
+    const categoriaEtariaSelectedOptions = $('#etaria').val() || [];
     const categoria = $('#categoria').val();
     const nivel = $('#nivel').val();
     const repeticoes = $('#repeticoes').val().replace(/\D/g, '') || null;
@@ -221,7 +247,6 @@ export function createAdminInterface() {
     const tempoVal = $('#tempo-admin').val().replace(/\D/g, '');
     const tempo = tempoVal ? parseInt(tempoVal) : null;
 
-    // Campos obrigatórios
     if (!nome) {
       exibirAlerta('erro', 'Por favor, preencha o campo Nome do Exercício.');
       return;
@@ -230,12 +255,12 @@ export function createAdminInterface() {
       exibirAlerta('erro', 'Por favor, preencha o campo Explicação.');
       return;
     }
-    if (!impulso) {
-      exibirAlerta('erro', 'Por favor, selecione o Impulso.');
+    if (!impulsoSelectedOptions || impulsoSelectedOptions.length === 0) {
+      exibirAlerta('erro', 'Por favor, selecione pelo menos um Impulso.');
       return;
     }
-    if (!categoriaEtaria) {
-      exibirAlerta('erro', 'Por favor, selecione a Categoria Etária.');
+    if (!categoriaEtariaSelectedOptions || categoriaEtariaSelectedOptions.length === 0) {
+      exibirAlerta('erro', 'Por favor, selecione pelo menos uma Categoria Etária.');
       return;
     }
     if (!categoria) {
@@ -263,6 +288,24 @@ export function createAdminInterface() {
       exibirAlerta('erro', 'Preencha o Tempo ou as Séries e Repetições.');
       return;
     }
+
+    // Função para tratar seleção de todas as opções
+    function handleAllSelected(selectedOptions, allOptions, allOptionValue) {
+      if (selectedOptions.includes(allOptionValue) || selectedOptions.length === allOptions.length) {
+        // Todas as opções selecionadas ou 'todos' selecionado
+        return [allOptionValue];
+      } else {
+        return selectedOptions.filter(value => value !== allOptionValue);
+      }
+    }
+
+    // Obter todas as opções disponíveis para impulso e categoria etária
+    const impulsoOptions = $('#impulso option').map(function () { return $(this).val(); }).get();
+    const categoriaEtariaOptions = $('#etaria option').map(function () { return $(this).val(); }).get();
+
+    // Tratar seleção de todas as opções
+    const impulso = handleAllSelected(impulsoSelectedOptions, impulsoOptions, 'todos');
+    const categoriaEtaria = handleAllSelected(categoriaEtariaSelectedOptions, categoriaEtariaOptions, 'todos');
 
     // Mostrar o loader
     loader.style.display = 'flex';

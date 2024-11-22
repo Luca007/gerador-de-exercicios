@@ -175,12 +175,12 @@ async function buscarEExibirExercicios() {
 
         // Impulso
         const impulsoCell = document.createElement('td');
-        impulsoCell.innerText = exercise.impulso || '';
+        impulsoCell.innerText = Array.isArray(exercise.impulso) ? exercise.impulso.join(', ') : exercise.impulso || '';
         row.appendChild(impulsoCell);
 
         // Categoria Etária
         const etariaCell = document.createElement('td');
-        etariaCell.innerText = exercise.etaria || '';
+        etariaCell.innerText = Array.isArray(exercise.etaria) ? exercise.etaria.join(', ') : exercise.etaria || '';
         row.appendChild(etariaCell);
 
         // Nível
@@ -271,15 +271,17 @@ function editarExercicio(exercise) {
       label: 'Impulso (Equipamento):',
       id: 'impulso',
       type: 'select',
-      options: ['nenhum', 'Lira', 'Solo', 'Tecido', 'Trapézio'],
-      required: true
+      options: ['todos', 'nenhum', 'Lira', 'Solo', 'Tecido', 'Trapézio'],
+      required: true,
+      multiple: true
     },
     {
       label: 'Categoria Etária:',
       id: 'etaria',
       type: 'select',
       options: ['todos', 'criança', 'adulto', 'idoso'],
-      required: true
+      required: true,
+      multiple: true
     },
     {
       label: 'Categoria:',
@@ -371,8 +373,8 @@ function editarExercicio(exercise) {
     // Validação personalizada
     const nome = $('#nome').val().trim();
     const explicacao = $('#explicacao').val().trim();
-    const impulso = $('#impulso').val();
-    const categoriaEtaria = $('#etaria').val();
+    const impulsoSelectedOptions = $('#impulso').val() || [];
+    const categoriaEtariaSelectedOptions = $('#etaria').val() || [];
     const categoria = $('#categoria').val();
     const nivel = $('#nivel').val();
     const repeticoes = $('#repeticoes').val().replace(/\D/g, '') || null;
@@ -388,12 +390,12 @@ function editarExercicio(exercise) {
       exibirAlerta('erro', 'Por favor, preencha o campo Explicação.');
       return;
     }
-    if (!impulso) {
-      exibirAlerta('erro', 'Por favor, selecione o Impulso.');
+    if (!impulsoSelectedOptions || impulsoSelectedOptions.length === 0) {
+      exibirAlerta('erro', 'Por favor, selecione pelo menos um Impulso.');
       return;
     }
-    if (!categoriaEtaria) {
-      exibirAlerta('erro', 'Por favor, selecione a Categoria Etária.');
+    if (!categoriaEtariaSelectedOptions || categoriaEtariaSelectedOptions.length === 0) {
+      exibirAlerta('erro', 'Por favor, selecione pelo menos uma Categoria Etária.');
       return;
     }
     if (!categoria) {
@@ -421,6 +423,24 @@ function editarExercicio(exercise) {
       exibirAlerta('erro', 'Preencha o Tempo ou as Séries e Repetições.');
       return;
     }
+
+    // Função para tratar seleção de todas as opções
+    function handleAllSelected(selectedOptions, allOptions, allOptionValue) {
+      if (selectedOptions.includes(allOptionValue) || selectedOptions.length === allOptions.length) {
+        // Todas as opções selecionadas ou 'todos' selecionado
+        return [allOptionValue];
+      } else {
+        return selectedOptions.filter(value => value !== allOptionValue);
+      }
+    }
+
+    // Obter todas as opções disponíveis para impulso e categoria etária
+    const impulsoOptions = $('#impulso option').map(function () { return $(this).val(); }).get();
+    const categoriaEtariaOptions = $('#etaria option').map(function () { return $(this).val(); }).get();
+
+    // Tratar seleção de todas as opções
+    const impulso = handleAllSelected(impulsoSelectedOptions, impulsoOptions, 'todos');
+    const categoriaEtaria = handleAllSelected(categoriaEtariaSelectedOptions, categoriaEtariaOptions, 'todos');
 
     // Mostrar o loader
     loader.style.display = 'flex';

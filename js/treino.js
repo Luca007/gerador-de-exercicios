@@ -79,7 +79,7 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
       // Filtrar exercícios no lado do cliente
       exercicios = exercicios.filter(exercicio => {
         const nivelMatch = (nivel === 'todos' || exercicio.nivel === 'todos' || exercicio.nivel === nivel);
-        const etariaMatch = (categoriaEtaria === 'todos' || exercicio.etaria === 'todos' || exercicio.etaria === categoriaEtaria);
+        const etariaMatch = (categoriaEtaria === 'todos' || exercicio.etaria.includes('todos') || exercicio.etaria.includes(categoriaEtaria));
         return nivelMatch && etariaMatch;
       });
 
@@ -194,10 +194,10 @@ function exibirTreino(titulo, exercicios, elemento) {
       }
 
       // Impulso
-      if (exercicio.impulso && exercicio.impulso.trim() !== '' && exercicio.impulso !== 'nenhum') {
+      if (exercicio.impulso && exercicio.impulso.length > 0 && !exercicio.impulso.includes('nenhum')) {
         const impulsoPara = document.createElement('p');
         impulsoPara.className = 'exercise-impulso';
-        impulsoPara.innerHTML = `<strong>Impulso:</strong> ${exercicio.impulso}`;
+        impulsoPara.innerHTML = `<strong>Impulso:</strong> ${exercicio.impulso.join(', ')}`;
         listItem.appendChild(impulsoPara);
       }
 
