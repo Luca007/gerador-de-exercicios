@@ -296,13 +296,13 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 5dvh;
-  align-items: stretch;
+  align-items: end;
   padding: 10px 0;
 }
 
 /* Botões dentro do contêiner de ações */
 .actions-container button {
-  width: 110%;
+  width: 100px;
 }
 
 /* Responsividade */
