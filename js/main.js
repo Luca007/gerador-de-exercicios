@@ -3,7 +3,6 @@ import './utils.js';
 import './auth.js';
 import './select.js';
 import './admin.js';
-import './showPassword.js';
 import './exercicio.js';
 import './treino.js';
 
