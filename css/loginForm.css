@@ -238,3 +238,28 @@
         opacity: 1;
     }
 }
+
+/* ------ Configurações de responsividade ------ */
+@media (max-width: 1500px) {
+    .login-form-container {
+        width: 560px;
+    }
+
+    .login-form-container .login-form-group input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .login-form-container {
+        width: 83dvw;
+    }
+
+    .login-form-container .login-form-group input {
+        width: 100%;
+    }
+
+    .login-form-container .login-form-submit-btn {
+        width: 100%;
+    }
+}
