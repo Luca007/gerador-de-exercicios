@@ -16,7 +16,7 @@ function gerarTreino(e) {
   const tempoTotal = parseInt(tempoTotalVal);
 
   if (!tempoTotalVal || isNaN(tempoTotal)) {
-    exibirAlerta('erro', 'Por favor, preencha o campo Tempo disponível.');
+    exibirAlerta('aviso', 'Por favor, preencha o campo Tempo disponível.');
     return;
   }
 
