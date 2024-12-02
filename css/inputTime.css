@@ -307,4 +307,7 @@
     .grid {
         width: 100dvw;
     }
+    #input-mask {
+        width: 80dvw;
+    }
   }
