@@ -120,6 +120,8 @@ export function applyInputMasks() {
     $('#tempo-disponivel').inputmask('integer', {
       rightAlign: false,
       placeholder: '',
+      showMaskOnHover: false,
+      showMaskOnFocus: false,
       allowMinus: false,
       allowPlus: false,
       min: 1,

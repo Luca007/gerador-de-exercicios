@@ -1,6 +1,6 @@
 /* Estilos Gerais */
 body {
-  background-color: #1e1e1e; /* Fundo escuro */
+  background-color: #000000; /* Fundo escuro */
   color: #f0f0f0; /* Texto claro */
   font-family: 'Roboto', sans-serif;
   margin: 0;
@@ -131,6 +131,10 @@ h1,
 h2 {
   color: #f0f0f0;
   font-weight: bold;
+}
+
+h1 {
+  font-size: 2.5em;
 }
 
 /* Títulos das seções */
