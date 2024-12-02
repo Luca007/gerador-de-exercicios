@@ -304,4 +304,7 @@
     .border {
         max-width: 91.4dvw;
     }
+    .grid {
+        width: 100dvw;
+    }
   }
