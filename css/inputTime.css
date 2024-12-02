@@ -269,25 +269,7 @@
   }
   
   
-  /* ------ Configurações de responsividade ------ */
-  @media (max-width: 1500px) {
-    .input {
-        width: 470px;
-    }
-    .glow {
-        max-width: 580px;
-    }
-    .darkBorderBg {
-        max-width: 486px;
-    }
-    .white {
-        max-width: 478px;
-    }
-    .border {
-        max-width: 474px;
-    }
-  }
-  
+  /* ------ Configurações de responsividade ------ */  
   @media (max-width: 768px) {
       .input {
         width: 470px;
@@ -303,5 +285,23 @@
     }
     .border {
         max-width: 474px;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .input {
+        width: 90dvw;
+    }
+    .glow {
+        max-width: 100dvw;
+    }
+    .darkBorderBg {
+        max-width: 92dvw;
+    }
+    .white {
+        max-width: 91.6dvw;
+    }
+    .border {
+        max-width: 91.4dvw;
     }
   }
