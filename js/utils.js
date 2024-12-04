@@ -39,7 +39,10 @@ export function exibirAlerta(tipo, mensagem) {
   };
 
   const tipoAlert = tipos[tipo] || tipos.info;
+  createAlert(tipoAlert, mensagem);
+}
 
+function createAlert(tipoAlert, mensagem) {
   const alertaDiv = document.createElement('div');
   alertaDiv.className = `space-y-2 p-4 ${tipoAlert.bgColor} ${tipoAlert.borderColor} ${tipoAlert.textColor} rounded-lg flex flex-col items-center justify-center transition duration-300 ease-in-out transform hover:scale-105 ${tipoAlert.hoverColor} shadow-lg`;
   alertaDiv.role = 'alert';
