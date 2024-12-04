@@ -34,9 +34,7 @@ function gerarTreino(e) {
 
 async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
   resultadoDiv.innerHTML = '';
-
-  // Mostrar o loader
-  loader.style.display = 'flex';
+  mostrarLoader();
 
   // Definir as proporções de tempo para cada categoria
   const proporcoes = {
@@ -47,10 +45,34 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
     CoolDown: 5 / 90
   };
 
+  const temposCategoria = calcularTemposCategoria(tempoTotal, proporcoes);
+  const temposEmSegundos = converterTemposParaSegundos(temposCategoria);
+
+  try {
+    const treinos = await obterTreinos(temposEmSegundos, nivel, categoriaEtaria);
+    exibirTreinos(treinos);
+    esconderLoader();
+  } catch (error) {
+    exibirErro();
+    esconderLoader();
+  }
+}
+
+// Mostrar o loader
+function mostrarLoader() {
+  loader.style.display = 'flex';
+}
+
+// Esconder o loader
+function esconderLoader() {
+  loader.style.display = 'none';
+}
+
+// Calcular o tempo para cada categoria
+function calcularTemposCategoria(tempoTotal, proporcoes) {
   const temposCategoria = {};
   let tempoTotalCalculado = 0;
 
-  // Calcular o tempo para cada categoria
   for (const categoria in proporcoes) {
     const tempoCategoria = Math.floor(tempoTotal * proporcoes[categoria]);
     temposCategoria[categoria] = tempoCategoria;
@@ -59,49 +81,51 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
 
   // Ajustar o tempo do CoolDown para compensar possíveis arredondamentos
   temposCategoria['CoolDown'] += tempoTotal - tempoTotalCalculado;
+  return temposCategoria;
+}
 
-  // Converter tempos disponíveis para segundos
+// Converter tempos disponíveis para segundos
+function converterTemposParaSegundos(temposCategoria) {
   const temposEmSegundos = {};
   for (const categoria in temposCategoria) {
     temposEmSegundos[categoria] = temposCategoria[categoria] * 60;
   }
+  return temposEmSegundos;
+}
 
-  try {
-    // Obter exercícios de cada categoria
-    const categorias = ['Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'];
-    const treinos = {};
+// Obter exercícios de cada categoria
+async function obterTreinos(temposEmSegundos, nivel, categoriaEtaria) {
+  const categorias = ['Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'];
+  const treinos = {};
 
-    for (const categoria of categorias) {
-      let exercicios = await obterExercicios({
-        categoria: categoria
-      });
-
-      // Filtrar exercícios no lado do cliente
-      exercicios = exercicios.filter(exercicio => {
-        const nivelMatch = (nivel === 'todos' || exercicio.nivel === 'todos' || exercicio.nivel === nivel);
-        const etariaMatch = (categoriaEtaria === 'todos' || exercicio.etaria.includes('todos') || exercicio.etaria.includes(categoriaEtaria));
-        return nivelMatch && etariaMatch;
-      });
-
-      // Selecionar exercícios que se encaixem no tempo disponível
-      treinos[categoria] = selecionarExercicios(exercicios, temposEmSegundos[categoria]);
-    }
-    
-    // Exibir o treino
-    for (const categoria of categorias) {
-      exibirTreino(categoria, treinos[categoria], resultadoDiv);
-    }
-
-    // Esconder o loader
-    loader.style.display = 'none';
-
-  } catch (error) {
-    console.error('Erro ao montar o treino:', error);
-    resultadoDiv.innerHTML = '<div class="alert alert-danger">Desculpe, ocorreu um erro ao gerar o treino.</div>';
-
-    // Esconder o loader
-    loader.style.display = 'none';
+  // Selecionar exercícios que se encaixem no tempo disponível
+  for (const categoria of categorias) {
+    let exercicios = await obterExercicios({ categoria: categoria });
+    exercicios = filtrarExercicios(exercicios, nivel, categoriaEtaria);
+    treinos[categoria] = selecionarExercicios(exercicios, temposEmSegundos[categoria]);
   }
+  return treinos;
+}
+
+// Filtrar exercícios no lado do cliente
+function filtrarExercicios(exercicios, nivel, categoriaEtaria) {
+  return exercicios.filter(exercicio => {
+    const nivelMatch = (nivel === 'todos' || exercicio.nivel === 'todos' || exercicio.nivel === nivel);
+    const etariaMatch = (categoriaEtaria === 'todos' || exercicio.etaria.includes('todos') || exercicio.etaria.includes(categoriaEtaria));
+    return nivelMatch && etariaMatch;
+  });
+}
+
+// Exibir o treino
+function exibirTreinos(treinos) {
+  const categorias = ['Aquecimento', 'Fortalecimento', 'Alongamento', 'Equipamento', 'CoolDown'];
+  for (const categoria of categorias) {
+    exibirTreino(categoria, treinos[categoria], resultadoDiv);
+  }
+}
+
+function exibirErro() {
+  resultadoDiv.innerHTML = '<div class="alert alert-danger">Desculpe, ocorreu um erro ao gerar o treino.</div>';
 }
 
 function selecionarExercicios(exercicios, tempoDisponivel) {
@@ -147,40 +171,7 @@ function exibirTreino(titulo, exercicios, elemento) {
       // Adicionar nome ao título
       titleDuration.appendChild(exerciseName);
 
-      // Duração ou Séries/Repetições
-      if (exercicio.duracao) {
-        const separator = document.createTextNode(' - ');
-        titleDuration.appendChild(separator);
-
-        const exerciseDuration = document.createElement('span');
-        exerciseDuration.className = 'exercise-duration';
-
-        // Converter duração de segundos para minutos ou manter em segundos
-        let durationText;
-        if (exercicio.duracao <= 59) {
-          durationText = `${exercicio.duracao} seg`;
-        } else {
-          const minutes = Math.floor(exercicio.duracao / 60);
-          const seconds = exercicio.duracao % 60;
-          if (seconds === 0) {
-            durationText = `${minutes} min`;
-          } else {
-            durationText = `${minutes} min ${seconds} seg`;
-          }
-        }
-        exerciseDuration.innerText = durationText;
-
-        // Adicionar ao título
-        titleDuration.appendChild(exerciseDuration);
-      } else if (exercicio.series && exercicio.repeticoes) {
-        const separator = document.createTextNode(' - ');
-        titleDuration.appendChild(separator);
-
-        const seriesReps = document.createElement('span');
-        seriesReps.className = 'exercise-series-reps';
-        seriesReps.innerText = `${exercicio.series} séries de ${exercicio.repeticoes} repetições`;
-        titleDuration.appendChild(seriesReps);
-      }
+      createTitleDuration(titleDuration, exercicio);
 
       // Adicionar título ao item da lista
       listItem.appendChild(titleDuration);
@@ -193,29 +184,7 @@ function exibirTreino(titulo, exercicios, elemento) {
         listItem.appendChild(explicacaoPara);
       }
 
-      // Impulso
-      if (exercicio.impulso && exercicio.impulso.length > 0 && !exercicio.impulso.includes('nenhum')) {
-        const impulsoPara = document.createElement('p');
-        impulsoPara.className = 'exercise-impulso';
-        impulsoPara.innerHTML = `<strong>Impulso:</strong> ${exercicio.impulso.join(', ')}`;
-        listItem.appendChild(impulsoPara);
-      }
-
-      // Repetições
-      if (exercicio.repeticoes && !exercicio.duracao) {
-        const repeticoesPara = document.createElement('p');
-        repeticoesPara.className = 'exercise-repeticoes';
-        repeticoesPara.innerHTML = `<strong>Repetições:</strong> ${exercicio.repeticoes}`;
-        listItem.appendChild(repeticoesPara);
-      }
-
-      // Séries
-      if (exercicio.series && !exercicio.duracao) {
-        const seriesPara = document.createElement('p');
-        seriesPara.className = 'exercise-series';
-        seriesPara.innerHTML = `<strong>Séries:</strong> ${exercicio.series}`;
-        listItem.appendChild(seriesPara);
-      }
+      createExerciseDetails(listItem, exercicio);
 
       listGroup.appendChild(listItem);
     });
@@ -226,4 +195,92 @@ function exibirTreino(titulo, exercicios, elemento) {
     alertDiv.innerText = `Não há exercícios disponíveis para a categoria ${titulo}.`;
     elemento.appendChild(alertDiv);
   }
+}
+
+function createExerciseDetails(listItem, exercicio) {
+  // Impulso
+  if (deveExibirImpulso(exercicio)) {
+    const impulsoPara = document.createElement('p');
+    impulsoPara.className = 'exercise-impulso';
+    impulsoPara.innerHTML = `<strong>Impulso:</strong> ${exercicio.impulso.join(', ')}`;
+    listItem.appendChild(impulsoPara);
+  }
+
+  // Função para verificar se deve exibir o impulso
+  function deveExibirImpulso(exercicio) {
+    return exercicio.impulso &&
+       exercicio.impulso.length > 0 &&
+       !exercicio.impulso.includes('nenhum');
+  }
+
+  // Repetições
+  if (exercicio.repeticoes && !exercicio.duracao) {
+    const repeticoesPara = document.createElement('p');
+    repeticoesPara.className = 'exercise-repeticoes';
+    repeticoesPara.innerHTML = `<strong>Repetições:</strong> ${exercicio.repeticoes}`;
+    listItem.appendChild(repeticoesPara);
+  }
+
+  // Séries
+  if (exercicio.series && !exercicio.duracao) {
+    const seriesPara = document.createElement('p');
+    seriesPara.className = 'exercise-series';
+    seriesPara.innerHTML = `<strong>Séries:</strong> ${exercicio.series}`;
+    listItem.appendChild(seriesPara);
+  }
+}
+
+function createTitleDuration(titleDuration, exercicio) {
+  // Duração ou Séries/Repetições
+  if (exercicio.duracao) {
+    adicionarDuracaoAoTitulo(titleDuration, exercicio.duracao);
+  } else if (exercicio.series && exercicio.repeticoes) {
+    adicionarSeriesRepeticoesAoTitulo(titleDuration, exercicio.series, exercicio.repeticoes);
+  }
+}
+
+function adicionarDuracaoAoTitulo(titleDuration, duracao) {
+  // Adicionar separador
+  const separator = document.createTextNode(' - ');
+  titleDuration.appendChild(separator);
+
+  // Criar elemento de duração
+  const exerciseDuration = document.createElement('span');
+  exerciseDuration.className = 'exercise-duration';
+
+  // Obter texto de duração formatado
+  const durationText = formatarDuracao(duracao);
+  exerciseDuration.innerText = durationText;
+
+  // Adicionar ao título
+  titleDuration.appendChild(exerciseDuration);
+}
+
+// Formatar duração em texto
+function formatarDuracao(duracao) {
+  if (duracao <= 59) {
+    return `${duracao} seg`;
+  } else {
+    const minutes = Math.floor(duracao / 60);
+    const seconds = duracao % 60;
+    if (seconds === 0) {
+      return `${minutes} min`;
+    } else {
+      return `${minutes} min ${seconds} seg`;
+    }
+  }
+}
+
+function adicionarSeriesRepeticoesAoTitulo(titleDuration, series, repeticoes) {
+  // Adicionar separador
+  const separator = document.createTextNode(' - ');
+  titleDuration.appendChild(separator);
+
+  // Criar elemento de séries e repetições
+  const seriesReps = document.createElement('span');
+  seriesReps.className = 'exercise-series-reps';
+  seriesReps.innerText = `${series} séries de ${repeticoes} repetições`;
+
+  // Adicionar ao título
+  titleDuration.appendChild(seriesReps);
 }
