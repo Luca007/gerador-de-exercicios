@@ -97,7 +97,6 @@ function criarBotaoEditar(exercise) {
   return editButton;
 }
 
-
 async function buscarEExibirExercicios() {
   const exercisesContainer = document.getElementById('exercises-container');
 
@@ -109,171 +108,236 @@ async function buscarEExibirExercicios() {
 
   try {
     const exercises = await obterExercicios();
-
-    const exercisesByCategory = {};
-
-    exercises.forEach((exercise) => {
-      const category = exercise.categoria || 'Sem Categoria';
-
-      if (!exercisesByCategory[category]) {
-        exercisesByCategory[category] = [];
-      }
-      exercisesByCategory[category].push(exercise);
-    });
+    const exercisesByCategory = categorizeExercises(exercises);
 
     // Esconder o loader padrão
     loader.style.display = 'none';
 
     // Exibir exercícios agrupados por categoria
     for (const category in exercisesByCategory) {
-      const sectionDiv = document.createElement('div');
-      sectionDiv.className = 'section';
-      sectionDiv.id = category.toLowerCase();
-
-      // Cabeçalho da seção
-      const sectionHeader = document.createElement('div');
-      sectionHeader.className = 'section-header';
-
-      // Ícone da seção (utilizando Font Awesome)
-      const iconElement = document.createElement('i');
-
-      // Definir a classe do ícone com base na categoria
-      switch (category.toLowerCase()) {
-        case 'aquecimento':
-          iconElement.className = 'section-icon fas fa-fire'; // Ícone de fogo para Aquecimento
-          break;
-        case 'fortalecimento':
-          iconElement.className = 'section-icon fas fa-dumbbell'; // Ícone de haltere para Fortalecimento
-          break;
-        case 'alongamento':
-          iconElement.className = 'section-icon fas fa-spa'; // Ícone de spa para Alongamento
-          break;
-        case 'equipamento':
-          iconElement.className = 'section-icon fas fa-tools'; // Ícone de ferramentas para Equipamento
-          break;
-        case 'cooldown':
-          iconElement.className = 'section-icon fas fa-snowflake'; // Ícone de floco de neve para CoolDown
-          break;
-        default:
-          iconElement.className = 'section-icon fas fa-question'; // Ícone de interrogação como padrão
-      }
-
-      // Adicionar o ícone ao cabeçalho da seção
-      sectionHeader.appendChild(iconElement);
-
-      // Título da seção
-      const sectionTitle = document.createElement('h2');
-      sectionTitle.className = 'section-title';
-      sectionTitle.innerText = category;
-
-      sectionHeader.appendChild(sectionTitle);
-      sectionDiv.appendChild(sectionHeader);
-
-      // Criar a tabela
-      const table = document.createElement('table');
-      table.className = 'exercise-table';
-
-      const thead = document.createElement('thead');
-      const headerRow = document.createElement('tr');
-
-      const headers = [
-        'Nome',
-        'Explicação',
-        'Repetições',
-        'Séries',
-        'Tempo',
-        'Equipamento',
-        'Categoria Etária',
-        'Nível',
-        'Ações'
-      ];
-      headers.forEach((headerText) => {
-        const th = document.createElement('th');
-        th.innerText = headerText;
-        headerRow.appendChild(th);
-      });
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-
-      exercisesByCategory[category].forEach((exercise) => {
-        const row = document.createElement('tr');
-
-        // Nome
-        const nameCell = document.createElement('td');
-        nameCell.innerText = exercise.nome || '';
-        row.appendChild(nameCell);
-
-        // Explicação
-        const explanationCell = document.createElement('td');
-        explanationCell.className = 'explanation-cell';
-        explanationCell.innerText = exercise.explicacao || '';
-        row.appendChild(explanationCell);
-
-        // Repetições
-        const repeticoesCell = document.createElement('td');
-        repeticoesCell.innerText = exercise.repeticoes || '';
-        row.appendChild(repeticoesCell);
-
-        // Séries
-        const seriesCell = document.createElement('td');
-        seriesCell.innerText = exercise.series || '';
-        row.appendChild(seriesCell);
-
-        // Tempo
-        const tempoCell = document.createElement('td');
-        tempoCell.innerText = exercise.duracao ? `${exercise.duracao} seg` : '';
-        row.appendChild(tempoCell);
-
-        // Impulso
-        const impulsoCell = document.createElement('td');
-        impulsoCell.innerText = Array.isArray(exercise.impulso) ? exercise.impulso.join(', ') : exercise.impulso || '';
-        row.appendChild(impulsoCell);
-
-        // Categoria Etária
-        const etariaCell = document.createElement('td');
-        etariaCell.innerText = Array.isArray(exercise.etaria) ? exercise.etaria.join(', ') : exercise.etaria || '';
-        row.appendChild(etariaCell);
-
-        // Nível
-        const nivelCell = document.createElement('td');
-        nivelCell.innerText = exercise.nivel || '';
-        row.appendChild(nivelCell);
-
-        // Ações
-        const actionsCell = document.createElement('td');
-
-        // Criar um contêiner para os botões
-        const actionsContainer = document.createElement('div');
-        actionsContainer.className = 'actions-container';
-
-        // Botão Editar
-        const editButton = criarBotaoEditar(exercise);
-        actionsContainer.appendChild(editButton);
-
-        // Botão Deletar
-        const deleteButton = criarBotaoDeletar(exercise.id);
-        actionsContainer.appendChild(deleteButton);
-
-        // Adicionar o contêiner à célula
-        actionsCell.appendChild(actionsContainer);
-        row.appendChild(actionsCell);
-
-        tbody.appendChild(row);
-      });
-
-      table.appendChild(tbody);
-      sectionDiv.appendChild(table);
-
-      // Adicionar a seção ao exercisesContainer, não ao manageSection
+      const sectionDiv = exibirExerciciosPorCategoria(
+        category,
+        exercisesByCategory[category]
+      );
       exercisesContainer.appendChild(sectionDiv);
     }
   } catch (error) {
     console.error('Erro ao obter exercícios:', error);
+    exibirAlerta('erro', 'Erro ao obter exercícios.');
     // Esconder o loader padrão
     loader.style.display = 'none';
-    exercisesContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar exercícios.</div>';
+  }
+}
+
+// Função para exibir exercícios por categoria
+function exibirExerciciosPorCategoria(category, exercises) {
+  const sectionDiv = document.createElement('div');
+  sectionDiv.className = 'section';
+  sectionDiv.id = category.toLowerCase();
+
+  // Cabeçalho da seção
+  const sectionHeader = criarCabecalhoSecao(category);
+  sectionDiv.appendChild(sectionHeader);
+
+  // Criar a tabela de exercícios
+  const table = criarTabelaExercicios(exercises);
+  sectionDiv.appendChild(table);
+
+  return sectionDiv;
+}
+
+// Função para criar o cabeçalho da seção
+function criarCabecalhoSecao(category) {
+  const sectionHeader = document.createElement('div');
+  sectionHeader.className = 'section-header';
+
+  // Ícone da seção (utilizando Font Awesome)
+  const iconElement = document.createElement('i');
+  setIconClass(iconElement, category);
+
+  // Adicionar o ícone ao cabeçalho da seção
+  sectionHeader.appendChild(iconElement);
+
+  // Título da seção
+  const sectionTitle = document.createElement('h2');
+  sectionTitle.className = 'section-title';
+  sectionTitle.innerText = category;
+
+  sectionHeader.appendChild(sectionTitle);
+
+  return sectionHeader;
+}
+
+// Função para criar a tabela de exercícios
+function criarTabelaExercicios(exercises) {
+  const table = document.createElement('table');
+  table.className = 'exercise-table';
+
+  const thead = criarCabecalhoTabela();
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+
+  exercises.forEach((exercise) => {
+    const row = criarLinhaExercicio(exercise);
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(tbody);
+
+  return table;
+}
+
+// Função para criar o cabeçalho da tabela
+function criarCabecalhoTabela() {
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+
+  const headers = [
+    'Nome',
+    'Explicação',
+    'Repetições',
+    'Séries',
+    'Tempo',
+    'Equipamento',
+    'Categoria Etária',
+    'Nível',
+    'Ações'
+  ];
+  headers.forEach((headerText) => {
+    const th = document.createElement('th');
+    th.innerText = headerText;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+
+  return thead;
+}
+
+// Função para criar uma linha da tabela
+function criarLinhaExercicio(exercise) {
+  const row = document.createElement('tr');
+
+  createNameCell(row, exercise);
+  createExplanationCell(row, exercise);
+  createRepeticoesCell(row, exercise);
+  createSeriesCell(row, exercise);
+  createTempoCell(row, exercise);
+  createEquipamentoCell(row, exercise);
+  createEtariaCell(row, exercise);
+  createNivelCell(row, exercise);
+  createActionsCell(row, exercise);
+
+  return row;
+}
+
+function createNameCell(row, exercise) {
+  const nameCell = document.createElement('td');
+  nameCell.innerText = exercise.nome || '';
+  row.appendChild(nameCell);
+}
+
+function createExplanationCell(row, exercise) {
+  const explanationCell = document.createElement('td');
+  explanationCell.className = 'explanation-cell';
+  explanationCell.innerText = exercise.explicacao || '';
+  row.appendChild(explanationCell);
+}
+
+function createRepeticoesCell(row, exercise) {
+  const repeticoesCell = document.createElement('td');
+  repeticoesCell.innerText = exercise.repeticoes || '';
+  row.appendChild(repeticoesCell);
+}
+
+function createSeriesCell(row, exercise) {
+  const seriesCell = document.createElement('td');
+  seriesCell.innerText = exercise.series || '';
+  row.appendChild(seriesCell);
+}
+
+function createTempoCell(row, exercise) {
+  const tempoCell = document.createElement('td');
+  tempoCell.innerText = exercise.duracao ? `${exercise.duracao} seg` : '';
+  row.appendChild(tempoCell);
+}
+
+function createEquipamentoCell(row, exercise) {
+  const impulsoCell = document.createElement('td');
+  impulsoCell.innerText = Array.isArray(exercise.impulso)
+    ? exercise.impulso.join(', ')
+    : exercise.impulso || '';
+  row.appendChild(impulsoCell);
+}
+
+function createEtariaCell(row, exercise) {
+  const etariaCell = document.createElement('td');
+  etariaCell.innerText = Array.isArray(exercise.etaria)
+    ? exercise.etaria.join(', ')
+    : exercise.etaria || '';
+  row.appendChild(etariaCell);
+}
+
+function createNivelCell(row, exercise) {
+  const nivelCell = document.createElement('td');
+  nivelCell.innerText = exercise.nivel || '';
+  row.appendChild(nivelCell);
+}
+
+function createActionsCell(row, exercise) {
+  const actionsCell = document.createElement('td');
+  const actionsContainer = criarActionsContainer(exercise);
+  actionsCell.appendChild(actionsContainer);
+  row.appendChild(actionsCell);
+}
+
+// Função para criar o contêiner de ações (editar e deletar)
+function criarActionsContainer(exercise) {
+  const actionsContainer = document.createElement('div');
+  actionsContainer.className = 'actions-container';
+
+  // Botão Editar
+  const editButton = criarBotaoEditar(exercise);
+  actionsContainer.appendChild(editButton);
+
+  // Botão Deletar
+  const deleteButton = criarBotaoDeletar(exercise.id);
+  actionsContainer.appendChild(deleteButton);
+
+  return actionsContainer;
+}
+
+function categorizeExercises(exercises) {
+  const exercisesByCategory = {};
+  exercises.forEach((exercise) => {
+    const category = exercise.categoria || 'Sem Categoria';
+    if (!exercisesByCategory[category]) {
+      exercisesByCategory[category] = [];
+    }
+    exercisesByCategory[category].push(exercise);
+  });
+  return exercisesByCategory;
+}
+
+function setIconClass(iconElement, category) {
+  switch (category.toLowerCase()) {
+    case 'aquecimento':
+      iconElement.className = 'section-icon fas fa-fire'; // Ícone de fogo para Aquecimento
+      break;
+    case 'fortalecimento':
+      iconElement.className = 'section-icon fas fa-dumbbell'; // Ícone de haltere para Fortalecimento
+      break;
+    case 'alongamento':
+      iconElement.className = 'section-icon fas fa-spa'; // Ícone de spa para Alongamento
+      break;
+    case 'equipamento':
+      iconElement.className = 'section-icon fas fa-tools'; // Ícone de ferramentas para Equipamento
+      break;
+    case 'cooldown':
+      iconElement.className = 'section-icon fas fa-snowflake'; // Ícone de floco de neve para CoolDown
+      break;
+    default:
+      iconElement.className = 'section-icon fas fa-question'; // Ícone de interrogação como padrão
   }
 }
 
@@ -420,143 +484,187 @@ function editarExercicio(exercise) {
   // Função para configurar a lógica dos grupos de checkboxes
   function setupCheckboxGroupLogic(fieldId) {
     const checkboxes = document.querySelectorAll(`input[name="${fieldId}"]`);
-    const todosCheckbox = document.querySelector(`input[name="${fieldId}"][value="todos"]`);
-    const nenhumCheckbox = document.querySelector(`input[name="${fieldId}"][value="nenhum"]`);
-    const otherCheckboxes = Array.from(checkboxes).filter(cb => cb !== todosCheckbox && cb !== nenhumCheckbox);
-  
-    checkboxes.forEach(checkbox => {
+    const todosCheckbox = document.querySelector(
+      `input[name="${fieldId}"][value="todos"]`
+    );
+    const nenhumCheckbox = document.querySelector(
+      `input[name="${fieldId}"][value="nenhum"]`
+    );
+    const otherCheckboxes = Array.from(checkboxes).filter(
+      (cb) => cb !== todosCheckbox && cb !== nenhumCheckbox
+    );
+
+    checkboxes.forEach((checkbox) => {
       checkbox.addEventListener('change', () => {
-        if (checkbox === todosCheckbox && todosCheckbox && todosCheckbox.checked) {
-          // 'todos' foi marcado, marcar todas as outras opções, exceto 'nenhum'
-          otherCheckboxes.forEach(cb => cb.checked = true);
-          if (nenhumCheckbox) nenhumCheckbox.checked = false;
-        } else if (checkbox === nenhumCheckbox && nenhumCheckbox && nenhumCheckbox.checked) {
-          // 'nenhum' foi marcado, desmarcar todas as outras opções
-          checkboxes.forEach(cb => {
-            if (cb !== nenhumCheckbox) {
-              cb.checked = false;
-            }
-          });
-          if (todosCheckbox) todosCheckbox.checked = false;
-        } else if (checkbox !== todosCheckbox && checkbox !== nenhumCheckbox) {
-          // Outra opção foi marcada ou desmarcada
-          if (otherCheckboxes.every(cb => cb.checked)) {
-            // Todas as opções estão marcadas, marcar 'todos' e desmarcar 'nenhum'
-            if (todosCheckbox) todosCheckbox.checked = true;
-            if (nenhumCheckbox) nenhumCheckbox.checked = false;
-          } else {
-            // Nem todas as opções estão marcadas, desmarcar 'todos'
-            if (todosCheckbox) todosCheckbox.checked = false;
-          }
-          // Se alguma opção está marcada, desmarcar 'nenhum'
-          if (otherCheckboxes.some(cb => cb.checked)) {
-            if (nenhumCheckbox) nenhumCheckbox.checked = false;
-          }
-        }
+        handleCheckboxChange(checkbox, {
+          checkboxes,
+          todosCheckbox,
+          nenhumCheckbox,
+          otherCheckboxes
+        });
       });
     });
   }
-  
 
+  function handleCheckboxChange(
+    checkbox,
+    { checkboxes, todosCheckbox, nenhumCheckbox, otherCheckboxes }
+  ) {
+    if (checkbox === todosCheckbox && todosCheckbox.checked) {
+      marcarTodos(todosCheckbox, nenhumCheckbox, otherCheckboxes);
+    } else if (checkbox === nenhumCheckbox && nenhumCheckbox.checked) {
+      marcarNenhum(nenhumCheckbox, checkboxes, todosCheckbox);
+    } else {
+      atualizarOutrasOpcoes(todosCheckbox, nenhumCheckbox, otherCheckboxes);
+    }
+  }
+  
+  function marcarTodos(todosCheckbox, nenhumCheckbox, otherCheckboxes) {
+    // 'todos' foi marcado, marcar todas as outras opções, exceto 'nenhum'
+    otherCheckboxes.forEach((cb) => (cb.checked = true));
+    if (nenhumCheckbox) nenhumCheckbox.checked = false;
+  }
+  
+  function marcarNenhum(nenhumCheckbox, checkboxes, todosCheckbox) {
+    // 'nenhum' foi marcado, desmarcar todas as outras opções
+    checkboxes.forEach((cb) => {
+      if (cb !== nenhumCheckbox) {
+        cb.checked = false;
+      }
+    });
+    if (todosCheckbox) todosCheckbox.checked = false;
+  }
+  
+  function atualizarOutrasOpcoes(todosCheckbox, nenhumCheckbox, otherCheckboxes) {
+    // Verificar se todas as outras opções estão marcadas
+    const todasMarcadas = otherCheckboxes.every((cb) => cb.checked);
+  
+    // Atualizar o checkbox 'todos'
+    if (todosCheckbox) {
+      todosCheckbox.checked = todasMarcadas;
+    }
+  
+    // Verificar se alguma opção está marcada
+    const algumaMarcada = otherCheckboxes.some((cb) => cb.checked);
+  
+    // Desmarcar 'nenhum' se alguma opção estiver marcada
+    if (nenhumCheckbox && algumaMarcada) {
+      nenhumCheckbox.checked = false;
+    }
+  
+    // Desmarcar 'todos' se nem todas as opções estão marcadas
+    if (todosCheckbox && !todasMarcadas) {
+      todosCheckbox.checked = false;
+    }
+  }
+  
   // Após o formulário ser adicionado ao DOM
   setupCheckboxGroupLogic('impulso');
   setupCheckboxGroupLogic('etaria');
+
+  // Função para validar os dados do formulário
+  function validateFormData(formData) {
+    // Lista de campos obrigatórios
+    const camposObrigatorios = [
+      { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
+      { campo: 'explicacao', nomeExibicao: 'Explicação' },
+      { campo: 'impulsoSelectedOptions', nomeExibicao: 'Equipamento' },
+      { campo: 'categoriaEtariaSelectedOptions', nomeExibicao: 'Categoria Etária' },
+      { campo: 'categoria', nomeExibicao: 'Categoria' },
+      { campo: 'nivel', nomeExibicao: 'Nível' }
+    ];
+
+    // Se 'tempo' não estiver preenchido, 'repeticoes' e 'series' são obrigatórios
+    if (!formData.tempo) {
+      camposObrigatorios.push(
+        { campo: 'repeticoes', nomeExibicao: 'Repetições' },
+        { campo: 'series', nomeExibicao: 'Séries' }
+      );
+    }
+
+    // Verificar quais campos estão faltando
+    const camposFaltantes = camposObrigatorios.filter(({ campo }) => {
+      const valor = formData[campo];
+      return (
+        valor === undefined ||
+        valor === null ||
+        (typeof valor === 'string' && valor.trim() === '') ||
+        (Array.isArray(valor) && valor.length === 0)
+      );
+    }).map(({ nomeExibicao }) => nomeExibicao);
+
+    // Se houver campos faltantes, exibir alerta
+    if (camposFaltantes.length > 0) {
+      exibirAlerta('aviso', 'Por favor, preencha os seguintes campos: ' + camposFaltantes.join(', '));
+      return false;
+    }
+
+    return true;
+  }
+
 
   // Manipulador de submissão do formulário
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Validação personalizada
-    const nome = $('#nome').val().trim();
-    const explicacao = $('#explicacao').val().trim();
+    const formData = extractFormData();
 
-    const impulsoCheckboxes = document.querySelectorAll('input[name="impulso"]:checked');
-    const impulsoSelectedOptions = Array.from(impulsoCheckboxes).map(cb => cb.value);
-
-    const categoriaEtariaCheckboxes = document.querySelectorAll('input[name="etaria"]:checked');
-    const categoriaEtariaSelectedOptions = Array.from(categoriaEtariaCheckboxes).map(cb => cb.value);
-
-    const categoria = $('#categoria').val();
-    const nivel = $('#nivel').val();
-    const repeticoes = $('#repeticoes').val().replace(/\D/g, '') || null;
-    const series = $('#series').val().replace(/\D/g, '') || null;
-    const tempoVal = $('#tempo-admin').val().replace(/\D/g, '');
-    const tempo = tempoVal ? parseInt(tempoVal) : null;
-
-    if (!nome) {
-      exibirAlerta('erro', 'Por favor, preencha o campo Nome do Exercício.');
-      return;
-    }
-    if (!explicacao) {
-      exibirAlerta('erro', 'Por favor, preencha o campo Explicação.');
-      return;
-    }
-    if (!impulsoSelectedOptions || impulsoSelectedOptions.length === 0) {
-      exibirAlerta('erro', 'Por favor, selecione pelo menos um Impulso.');
-      return;
-    }
-    if (!categoriaEtariaSelectedOptions || categoriaEtariaSelectedOptions.length === 0) {
-      exibirAlerta('erro', 'Por favor, selecione pelo menos uma Categoria Etária.');
-      return;
-    }
-    if (!categoria) {
-      exibirAlerta('erro', 'Por favor, selecione a Categoria.');
-      return;
-    }
-    if (!nivel) {
-      exibirAlerta('erro', 'Por favor, selecione o Nível.');
-      return;
-    }
-
-    // Validação dos campos obrigatórios com base em Tempo/Repetições/Séries
-    const repeticoesRequired = $('#repeticoes').data('required');
-    const seriesRequired = $('#series').data('required');
-
-    if (repeticoesRequired && !repeticoes) {
-      exibirAlerta('erro', 'Por favor, preencha o campo Repetições.');
-      return;
-    }
-    if (seriesRequired && !series) {
-      exibirAlerta('erro', 'Por favor, preencha o campo Séries.');
-      return;
-    }
-    if (!tempo && (!repeticoes || !series)) {
-      exibirAlerta('erro', 'Preencha o Tempo ou as Séries e Repetições.');
+    if (!validateFormData(formData)) {
       return;
     }
 
     // Função para tratar seleção de todas as opções
     function handleAllSelected(selectedOptions, allOptions, allOptionValue) {
-      if (selectedOptions.includes(allOptionValue) || selectedOptions.length === allOptions.length) {
-        // Todas as opções selecionadas ou 'todos' selecionado
+      const optionsWithoutAll = allOptions.filter((option) => option !== allOptionValue);
+    
+      // Verificar se todas as opções, exceto 'todos', estão selecionadas
+      const allOptionsSelected = optionsWithoutAll.every((option) =>
+        selectedOptions.includes(option)
+      );
+    
+      if (allOptionsSelected) {
+        // Se todas as opções estiverem selecionadas, retornar ['todos']
         return [allOptionValue];
       } else {
-        return selectedOptions.filter(value => value !== allOptionValue);
+        // Caso contrário, retornar as opções selecionadas sem 'todos'
+        return selectedOptions.filter((value) => value !== allOptionValue);
       }
     }
-
+    
     // Obter todas as opções disponíveis para impulso e categoria etária
-    const impulsoOptions = [...document.querySelectorAll(`input[name="impulso"]`)].map(cb => cb.value);
-    const categoriaEtariaOptions = [...document.querySelectorAll(`input[name="etaria"]`)].map(cb => cb.value);
+    const impulsoOptions = [
+      ...document.querySelectorAll(`input[name="impulso"]`)
+    ].map((cb) => cb.value);
+    const categoriaEtariaOptions = [
+      ...document.querySelectorAll(`input[name="etaria"]`)
+    ].map((cb) => cb.value);
 
     // Tratar seleção de todas as opções
-    const impulso = handleAllSelected(impulsoSelectedOptions, impulsoOptions, 'todos');
-    const categoriaEtaria = handleAllSelected(categoriaEtariaSelectedOptions, categoriaEtariaOptions, 'todos');
+    const impulso = handleAllSelected(
+      formData.impulsoSelectedOptions,
+      impulsoOptions,
+      'todos'
+    );
+    const categoriaEtaria = handleAllSelected(
+      formData.categoriaEtariaSelectedOptions,
+      categoriaEtariaOptions,
+      'todos'
+    );
 
     // Mostrar o loader
     loader.style.display = 'flex';
 
     try {
       await atualizarExercicio(exercise.id, {
-        nome,
+        nome: formData.nome,
         etaria: categoriaEtaria,
-        explicacao,
+        explicacao: formData.explicacao,
         impulso,
-        repeticoes: repeticoes ? parseInt(repeticoes) : null,
-        series: series ? parseInt(series) : null,
-        duracao: tempo,
-        categoria,
-        nivel
+        repeticoes: formData.repeticoes ? parseInt(formData.repeticoes) : null,
+        series: formData.series ? parseInt(formData.series) : null,
+        duracao: formData.tempo,
+        categoria: formData.categoria,
+        nivel: formData.nivel
       });
       exibirAlerta('sucesso', 'Exercício atualizado com sucesso!');
 
@@ -567,8 +675,8 @@ function editarExercicio(exercise) {
         loader.style.display = 'none';
       }, 20);
     } catch (error) {
-      exibirAlerta('erro', 'Erro ao atualizar exercício.');
       console.error('Erro ao atualizar exercício:', error);
+      exibirAlerta('erro', 'Erro ao atualizar exercício.');
 
       // Esconder o loader
       loader.style.display = 'none';
@@ -579,6 +687,44 @@ function editarExercicio(exercise) {
       adminMessage.innerHTML = '';
     }, 3000);
   });
+
+  function extractFormData() {
+    const nome = $('#nome').val().trim();
+    const explicacao = $('#explicacao').val().trim();
+
+    const impulsoCheckboxes = document.querySelectorAll(
+      'input[name="impulso"]:checked'
+    );
+    const impulsoSelectedOptions = Array.from(impulsoCheckboxes).map(
+      (cb) => cb.value
+    );
+
+    const categoriaEtariaCheckboxes = document.querySelectorAll(
+      'input[name="etaria"]:checked'
+    );
+    const categoriaEtariaSelectedOptions = Array.from(
+      categoriaEtariaCheckboxes
+    ).map((cb) => cb.value);
+
+    const categoria = $('#categoria').val();
+    const nivel = $('#nivel').val();
+    const repeticoes = $('#repeticoes').val().replace(/\D/g, '') || null;
+    const series = $('#series').val().replace(/\D/g, '') || null;
+    const tempoVal = $('#tempo-admin').val().replace(/\D/g, '');
+    const tempo = tempoVal ? parseInt(tempoVal) : null;
+
+    return {
+      nome,
+      explicacao,
+      impulsoSelectedOptions,
+      categoriaEtariaSelectedOptions,
+      categoria,
+      nivel,
+      repeticoes,
+      series,
+      tempo
+    };
+  }
 }
 
 export function adicionarBotaoGerenciarExercicios() {
