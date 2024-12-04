@@ -31,38 +31,40 @@ export function inicializarSelecao({ containerId, selectionIndicatorId, hoverEff
     }
   }
 
-  function updateHoverEffectToSelected() {
-    const selected = container.querySelector('.option.selected');
-    const rect = selected.getBoundingClientRect();
+  function updateHoverEffect(element, isHover = false) {
+    const rect = element.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
 
     if (isColumnLayout()) {
-        // Layout em coluna (mobile)
-        const adjustedHeight = rect.height + gap;
-        const adjustedTop = rect.top - containerRect.top - (gap / 2);
-        hoverEffectTop.style.height = `${adjustedHeight}px`;
-        hoverEffectTop.style.top = `${adjustedTop}px`;
-        hoverEffectTop.style.left = '0';
-        hoverEffectTop.style.right = '';
+      // Layout em coluna (mobile)
+      const adjustedHeight = rect.height + gap;
+      const adjustedTop = rect.top - containerRect.top - gap / 2;
+      hoverEffectTop.style.height = `${adjustedHeight}px`;
+      hoverEffectTop.style.top = `${adjustedTop}px`;
+      hoverEffectTop.style.left = '0';
+      hoverEffectTop.style.right = '';
 
-        hoverEffectBottom.style.height = `${adjustedHeight}px`;
-        hoverEffectBottom.style.top = `${adjustedTop}px`;
-        hoverEffectBottom.style.right = '0';
-        hoverEffectBottom.style.left = `calc(100% - ${hoverEffectBottom.offsetWidth}px)`;
-
-        // Largura fixa no CSS
+      hoverEffectBottom.style.height = `${adjustedHeight}px`;
+      hoverEffectBottom.style.top = `${adjustedTop}px`;
+      hoverEffectBottom.style.right = '0';
+      hoverEffectBottom.style.left = `calc(100% - ${hoverEffectBottom.offsetWidth}px)`;
     } else {
-        // Layout em linha (desktop)
-        const adjustedWidth = rect.width + gap;
-        const adjustedLeft = rect.left - containerRect.left - (gap / 2);
-        hoverEffectTop.style.width = `${adjustedWidth}px`;
-        hoverEffectTop.style.left = `${adjustedLeft}px`;
-        hoverEffectTop.style.height = `calc(50% - 35px)`;
+      // Layout em linha (desktop)
+      const adjustedWidth = rect.width + gap;
+      const adjustedLeft = rect.left - containerRect.left - gap / 2;
+      hoverEffectTop.style.width = `${adjustedWidth}px`;
+      hoverEffectTop.style.left = `${adjustedLeft}px`;
+      hoverEffectTop.style.height = isHover ? `calc(50% - 25px)` : `calc(50% - 35px)`;
 
-        hoverEffectBottom.style.width = `${adjustedWidth}px`;
-        hoverEffectBottom.style.left = `${adjustedLeft}px`;
-        hoverEffectBottom.style.height = `calc(50% - 35px)`;
+      hoverEffectBottom.style.width = `${adjustedWidth}px`;
+      hoverEffectBottom.style.left = `${adjustedLeft}px`;
+      hoverEffectBottom.style.height = isHover ? `calc(50% - 25px)` : `calc(50% - 35px)`;
     }
+  }
+
+  function updateHoverEffectToSelected() {
+    const selected = container.querySelector('.option.selected');
+    updateHoverEffect(selected);
   }
 
   const initialSelected = container.querySelector('.option.selected');
@@ -77,35 +79,7 @@ export function inicializarSelecao({ containerId, selectionIndicatorId, hoverEff
     });
 
     option.addEventListener('mouseenter', () => {
-      const rect = option.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-
-      if (isColumnLayout()) {
-          const adjustedHeight = rect.height + gap;
-          const adjustedTop = rect.top - containerRect.top - (gap / 2);
-          hoverEffectTop.style.height = `${adjustedHeight}px`;
-          hoverEffectTop.style.top = `${adjustedTop}px`;
-          hoverEffectTop.style.left = '0';
-          hoverEffectTop.style.right = '';
-
-          hoverEffectBottom.style.height = `${adjustedHeight}px`;
-          hoverEffectBottom.style.top = `${adjustedTop}px`;
-          hoverEffectBottom.style.right = '0';
-          hoverEffectBottom.style.left = `calc(100% - ${hoverEffectBottom.offsetWidth}px)`;
-
-          // Largura fixa no CSS
-      } else {
-          const adjustedWidth = rect.width + gap;
-          const adjustedLeft = rect.left - containerRect.left - (gap / 2);
-
-          hoverEffectTop.style.width = `${adjustedWidth}px`;
-          hoverEffectTop.style.left = `${adjustedLeft}px`;
-          hoverEffectTop.style.height = `calc(50% - 25px)`;
-
-          hoverEffectBottom.style.width = `${adjustedWidth}px`;
-          hoverEffectBottom.style.left = `${adjustedLeft}px`;
-          hoverEffectBottom.style.height = `calc(50% - 25px)`;
-      }
+      updateHoverEffect(option, true);
     });
 
     option.addEventListener('mouseleave', () => {
