@@ -1,16 +1,18 @@
+// Importar os módulos necessários
 import './firebase.js';
-import './utils.js';
 import './auth.js';
+import './utils.js';
 import './select.js';
 import './admin.js';
 import './exercicio.js';
 import './treino.js';
 
-// Aplicar máscaras de entrada ao carregar a página
 import { applyInputMasks } from './utils.js';
 import { inicializarSelecao } from './select.js';
 
-$(document).ready(function() {
+// Aplicar máscaras de entrada e inicializar seleções ao carregar o documento
+$(document).ready(function () {
+  // Aplicar máscaras de entrada
   applyInputMasks();
 
   // Inicializar o primeiro seletor
@@ -18,7 +20,7 @@ $(document).ready(function() {
     containerId: 'optionsContainer1',
     selectionIndicatorId: 'selectionIndicator1',
     hoverEffectTopId: 'hoverEffectTop1',
-    hoverEffectBottomId: 'hoverEffectBottom1'
+    hoverEffectBottomId: 'hoverEffectBottom1',
   });
 
   // Inicializar o segundo seletor
@@ -26,11 +28,7 @@ $(document).ready(function() {
     containerId: 'optionsContainer2',
     selectionIndicatorId: 'selectionIndicator2',
     hoverEffectTopId: 'hoverEffectTop2',
-    hoverEffectBottomId: 'hoverEffectBottom2'
+    hoverEffectBottomId: 'hoverEffectBottom2',
   });
 });
 
-window.addEventListener('load', function() {
-  // Esconde o loader após o carregamento da página
-  document.getElementById('loader').style.display = 'none';
-});
