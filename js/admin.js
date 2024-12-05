@@ -7,6 +7,7 @@ import {
 } from './utils.js';
 import { adicionarExercicio } from './firestore.js';
 import { criarFormulario } from './formGenerator.js';
+import { construirMensagem } from './formUtils.js';
 import {
   signInWithEmailAndPassword,
   signOut,
@@ -32,6 +33,24 @@ function createLoginForm() {
   // Remover instâncias anteriores
   removeExistingSections();
 
+  // Criar o formulário de login
+  const form = createLoginSection();
+
+  // Criar e adicionar grupos de campos
+  const emailGroup = createEmailGroup();
+  const passwordGroup = createPasswordGroup();
+  const submitButton = createSubmitButton();
+
+  form.appendChild(emailGroup);
+  form.appendChild(passwordGroup);
+  form.appendChild(submitButton);
+
+  // Adicionar eventos ao formulário
+  setupFormEvents(form);
+}
+
+// Função para criar a seção de login
+function createLoginSection() {
   // Criar a seção de login
   const loginSection = document.createElement('div');
   loginSection.id = 'login-section';
@@ -42,6 +61,17 @@ function createLoginForm() {
   form.className = 'form';
   form.id = 'login-form';
 
+  // Adicionar o formulário à seção de login
+  loginSection.appendChild(form);
+
+  // Adicionar a seção de login ao body
+  document.body.appendChild(loginSection);
+
+  return form;
+}
+
+// Função para criar o grupo de email
+function createEmailGroup() {
   // --- Grupo do Email ---
   const emailGroup = document.createElement('div');
   emailGroup.className = 'login-form-group';
@@ -60,6 +90,11 @@ function createLoginForm() {
   emailGroup.appendChild(emailLabel);
   emailGroup.appendChild(emailInput);
 
+  return emailGroup;
+}
+
+// Função para criar o grupo de senha
+function createPasswordGroup() {
   // --- Grupo da Senha ---
   const passwordGroup = document.createElement('div');
   passwordGroup.className = 'login-form-group';
@@ -78,6 +113,21 @@ function createLoginForm() {
   passwordInput.placeholder = 'Digite sua senha';
   passwordInput.required = false;
 
+  const togglePasswordSpan = createTogglePassword();
+
+  // Montar o password wrapper
+  passwordWrapper.appendChild(passwordInput);
+  passwordWrapper.appendChild(togglePasswordSpan);
+
+  // Adicionar label e wrapper ao grupo da senha
+  passwordGroup.appendChild(passwordLabel);
+  passwordGroup.appendChild(passwordWrapper);
+
+  return passwordGroup;
+}
+
+// Função para criar o toggle de mostrar/ocultar senha
+function createTogglePassword() {
   const togglePasswordSpan = document.createElement('span');
   togglePasswordSpan.className = 'toggle-password';
 
@@ -128,33 +178,22 @@ function createLoginForm() {
   // Adicionar o label ao span
   togglePasswordSpan.appendChild(toggleLabel);
 
-  // Montar o password wrapper
-  passwordWrapper.appendChild(passwordInput);
-  passwordWrapper.appendChild(togglePasswordSpan);
+  return togglePasswordSpan;
+}
 
-  // Adicionar label e wrapper ao grupo da senha
-  passwordGroup.appendChild(passwordLabel);
-  passwordGroup.appendChild(passwordWrapper);
-
+// Função para criar o botão de submissão
+function createSubmitButton() {
   // --- Botão de Submissão ---
   const submitButton = document.createElement('button');
   submitButton.type = 'submit';
   submitButton.className = 'login-form-submit-btn';
   submitButton.innerText = 'Entrar';
 
-  // Adicionar grupos ao formulário
-  form.appendChild(emailGroup);
-  form.appendChild(passwordGroup);
-  form.appendChild(submitButton);
+  return submitButton;
+}
 
-  // Adicionar o formulário à seção de login
-  loginSection.appendChild(form);
-
-  // Adicionar a seção de login ao body
-  document.body.appendChild(loginSection);
-
-  // --- Eventos ---
-
+// Função para configurar os eventos do formulário
+function setupFormEvents(form) {
   // Evento de submissão do formulário
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -200,7 +239,13 @@ function createLoginForm() {
   });
 
   // Evento para mostrar/ocultar a senha
-  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = form.querySelector('#password');
+  const togglePassword = form.querySelector('#togglePassword');
+  setupPasswordToggleEvent(passwordInput, togglePassword);
+}
+
+// Função para configurar o evento de mostrar/ocultar a senha
+function setupPasswordToggleEvent(passwordInput, togglePassword) {
   togglePassword.addEventListener('change', function () {
     passwordInput.type = this.checked ? 'text' : 'password';
   });
@@ -211,6 +256,21 @@ export function createAdminInterface() {
   // Remover instâncias anteriores
   removeExistingSections();
 
+  // Criar a interface de administração
+  const adminSection = buildAdminSection();
+
+  // Adicionar ao body
+  document.body.appendChild(adminSection);
+
+  // Aplicar máscaras aos campos após adicionar ao DOM
+  applyInputMasks();
+
+  // Configurar eventos
+  setupEventListeners(adminSection);
+}
+
+// Função para criar a seção de administração
+function buildAdminSection() {
   // Criar elementos
   const adminSection = document.createElement('div');
   adminSection.id = 'admin-section';
@@ -289,11 +349,13 @@ export function createAdminInterface() {
   form.appendChild(logoutButton);
   form.appendChild(adminMessage);
 
-  // Adicionar ao body
-  document.body.appendChild(adminSection);
+  return adminSection;
+}
 
-  // Aplicar máscaras aos campos após adicionar ao DOM
-  applyInputMasks();
+// Função para configurar os eventos
+function setupEventListeners(adminSection) {
+  const form = adminSection.querySelector('form');
+  const logoutButton = adminSection.querySelector('#logout-button');
 
   // Adicionar eventos aos campos
   $('#tempo-admin').on('input', updateFieldRequirements);
@@ -309,131 +371,137 @@ export function createAdminInterface() {
   adicionarBotaoGerenciarExercicios();
 
   // Manipulador de submissão do formulário
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = extractFormData();
-
-    if (!validateFormData(formData)) {
-      return;
-    }
-
-    // Obter todas as opções disponíveis para impulso e categoria etária
-    const impulsoOptions = [
-      ...document.querySelectorAll(`input[name="impulso"]`),
-    ].map((cb) => cb.value);
-    const categoriaEtariaOptions = [
-      ...document.querySelectorAll(`input[name="etaria"]`),
-    ].map((cb) => cb.value);
-
-    // Tratar seleção de todas as opções
-    const impulso = handleAllSelected(
-      formData.impulsoSelectedOptions,
-      impulsoOptions,
-      'todos'
-    );
-    const categoriaEtaria = handleAllSelected(
-      formData.categoriaEtariaSelectedOptions,
-      categoriaEtariaOptions,
-      'todos'
-    );
-
-    // Mostrar o loader
-    loader.style.display = 'flex';
-
-    try {
-      await adicionarExercicio({
-        nome: formData.nome,
-        etaria: categoriaEtaria,
-        explicacao: formData.explicacao,
-        impulso,
-        repeticoes: formData.repeticoes ? parseInt(formData.repeticoes) : null,
-        series: formData.series ? parseInt(formData.series) : null,
-        duracao: formData.tempo,
-        categoria: formData.categoria,
-        nivel: formData.nivel,
-      });
-      exibirAlerta('sucesso', 'Exercício adicionado com sucesso!');
-      form.reset();
-      updateFieldRequirements(); // Atualizar obrigatoriedade após resetar o formulário
-
-      // Resetar os checkboxes
-      document
-        .querySelectorAll('input[type="checkbox"]')
-        .forEach((cb) => (cb.checked = false));
-
-      loader.style.display = 'none';
-    } catch (error) {
-      exibirAlerta('erro', 'Erro ao adicionar exercício.');
-      console.error('Erro ao adicionar exercício:', error);
-      loader.style.display = 'none';
-    }
-  });
+  form.addEventListener('submit', handleFormSubmit);
 
   // Função de logout
-  logoutButton.addEventListener('click', () => {
-    signOut(auth)
-      .then(() => {
-        // Logout bem-sucedido
-        adminSection.remove(); // Remover a interface de administração
-        exibirAlerta('sucesso', 'Logout realizado com sucesso.');
-        console.log('Usuário desconectado');
-      })
-      .catch((error) => {
-        exibirAlerta('erro', 'Erro ao desconectar.');
-        console.error('Erro ao desconectar:', error);
-      });
-  });
+  logoutButton.addEventListener('click', handleLogout);
+}
 
-  // Função para validar os dados do formulário
-  function validateFormData(formData) {
-    // Lista de campos obrigatórios
-    const camposObrigatorios = [
-      { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
-      { campo: 'explicacao', nomeExibicao: 'Explicação' },
-      {
-        campo: 'impulsoSelectedOptions',
-        nomeExibicao: 'Equipamento',
-      },
-      {
-        campo: 'categoriaEtariaSelectedOptions',
-        nomeExibicao: 'Categoria Etária',
-      },
-      { campo: 'categoria', nomeExibicao: 'Categoria' },
-      { campo: 'nivel', nomeExibicao: 'Nível' },
-    ];
+// Função para manipular a submissão do formulário
+async function handleFormSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = extractFormData();
 
-    // Se 'tempo' não estiver preenchido, 'repeticoes' e 'series' são obrigatórios
-    if (!formData.tempo) {
-      camposObrigatorios.push(
-        { campo: 'repeticoes', nomeExibicao: 'Repetições' },
-        { campo: 'series', nomeExibicao: 'Séries' }
-      );
-    }
-
-    // Verificar quais campos estão faltando
-    const camposFaltantes = camposObrigatorios
-      .filter(({ campo }) => {
-        const valor = formData[campo];
-        return (
-          valor === undefined ||
-          valor === null ||
-          (typeof valor === 'string' && valor.trim() === '') ||
-          (Array.isArray(valor) && valor.length === 0)
-        );
-      })
-      .map(({ nomeExibicao }) => nomeExibicao);
-
-    // Se houver campos faltantes, exibir alerta
-    if (camposFaltantes.length > 0) {
-      exibirAlerta(
-        'aviso',
-        'Por favor, preencha os seguintes campos: ' +
-          camposFaltantes.join(', ')
-      );
-      return false;
-    }
-
-    return true;
+  if (!validateFormData(formData)) {
+    return;
   }
+
+  // Obter todas as opções disponíveis para impulso e categoria etária
+  const impulsoOptions = [
+    ...document.querySelectorAll(`input[name="impulso"]`),
+  ].map((cb) => cb.value);
+  const categoriaEtariaOptions = [
+    ...document.querySelectorAll(`input[name="etaria"]`),
+  ].map((cb) => cb.value);
+
+  // Tratar seleção de todas as opções
+  const impulso = handleAllSelected(
+    formData.impulsoSelectedOptions,
+    impulsoOptions,
+    'todos'
+  );
+  const categoriaEtaria = handleAllSelected(
+    formData.categoriaEtariaSelectedOptions,
+    categoriaEtariaOptions,
+    'todos'
+  );
+
+  // Mostrar o loader
+  loader.style.display = 'flex';
+
+  try {
+    await adicionarExercicio({
+      nome: formData.nome,
+      etaria: categoriaEtaria,
+      explicacao: formData.explicacao,
+      impulso,
+      repeticoes: formData.repeticoes ? parseInt(formData.repeticoes) : null,
+      series: formData.series ? parseInt(formData.series) : null,
+      duracao: formData.tempo,
+      categoria: formData.categoria,
+      nivel: formData.nivel,
+    });
+    exibirAlerta('sucesso', 'Exercício adicionado com sucesso!');
+    form.reset();
+    updateFieldRequirements(); // Atualizar obrigatoriedade após resetar o formulário
+
+    // Resetar os checkboxes
+    document
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach((cb) => (cb.checked = false));
+
+    loader.style.display = 'none';
+  } catch (error) {
+    exibirAlerta('erro', 'Erro ao adicionar exercício.');
+    console.error('Erro ao adicionar exercício:', error);
+    loader.style.display = 'none';
+  }
+}
+
+// Função para manipular o logout
+function handleLogout() {
+  signOut(auth)
+    .then(() => {
+      // Logout bem-sucedido
+      const adminSection = document.getElementById('admin-section');
+      if (adminSection) {
+        adminSection.remove(); // Remover a interface de administração
+      }
+      exibirAlerta('sucesso', 'Logout realizado com sucesso.');
+      console.log('Usuário desconectado');
+    })
+    .catch((error) => {
+      exibirAlerta('erro', 'Erro ao desconectar.');
+      console.error('Erro ao desconectar:', error);
+    });
+}
+
+// Função para validar os dados do formulário
+function validateFormData(formData) {
+  // Lista de campos obrigatórios
+  const camposObrigatorios = [
+    { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
+    { campo: 'explicacao', nomeExibicao: 'Explicação' },
+    {
+      campo: 'impulsoSelectedOptions',
+      nomeExibicao: 'Equipamento',
+    },
+    {
+      campo: 'categoriaEtariaSelectedOptions',
+      nomeExibicao: 'Categoria Etária',
+    },
+    { campo: 'categoria', nomeExibicao: 'Categoria' },
+    { campo: 'nivel', nomeExibicao: 'Nível' },
+  ];
+
+  // Se 'tempo' não estiver preenchido, 'repeticoes' e 'series' são obrigatórios
+  if (!formData.tempo) {
+    camposObrigatorios.push(
+      { campo: 'repeticoes', nomeExibicao: 'Repetições' },
+      { campo: 'series', nomeExibicao: 'Séries' }
+    );
+  }
+
+  // Verificar quais campos estão faltando
+  const camposFaltantes = camposObrigatorios
+    .filter(({ campo }) => {
+      const valor = formData[campo];
+      return (
+        valor === undefined ||
+        valor === null ||
+        (typeof valor === 'string' && valor.trim() === '') ||
+        (Array.isArray(valor) && valor.length === 0)
+      );
+    })
+    .map(({ nomeExibicao }) => nomeExibicao);
+
+  // Se houver campos faltantes, exibir alerta
+  if (camposFaltantes.length > 0) {
+    const mensagem = construirMensagem(camposFaltantes);
+    exibirAlerta('aviso', mensagem);
+    return false;
+  }
+
+  return true;
 }
