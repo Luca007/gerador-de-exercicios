@@ -6,6 +6,7 @@ import {
 } from './firestore.js';
 import { criarFormulario } from './formGenerator.js';
 import { createAdminInterface } from './admin.js';
+import { construirMensagem } from './formUtils.js';
 import {
   setupCheckboxGroupLogic,
   handleAllSelected,
@@ -586,50 +587,6 @@ function editarExercicio(exercise) {
     );
   }
 
-  // Função para construir a mensagem de alerta baseada nos campos faltantes
-  function construirMensagem(camposFaltantes) {
-    const essenciais = ['Repetições', 'Séries', 'Tempo'];
-    const essenciaisFaltantes = camposFaltantes.filter(campo => essenciais.includes(campo));
-    const outrosFaltantes = camposFaltantes.filter(campo => !essenciais.includes(campo));
-
-    if (todosEssenciaisFaltando(essenciaisFaltantes)) {
-      return gerarMensagem(['Repetições', 'Séries'], 'Tempo', outrosFaltantes);
-    }
-
-    if (faltamRepeticoesSeries(essenciaisFaltantes) || faltamTempo(essenciaisFaltantes)) {
-      return gerarMensagem(['Repetições', 'Séries'], 'Tempo', outrosFaltantes);
-    }
-
-    if (camposFaltantes.length === 1) {
-      return `Por favor, preencha o seguinte campo: ${camposFaltantes[0]}`;
-    }
-
-    return `Por favor, preencha os seguintes campos: ${camposFaltantes.join(', ')}`;
-  }
-
-  // Verifica se todos os essenciais estão faltando
-  function todosEssenciaisFaltando(essenciais) {
-    return essenciais.length === 3;
-  }
-
-  // Verifica se faltam Repetições e Séries
-  function faltamRepeticoesSeries(essenciais) {
-    return essenciais.includes('Repetições') && essenciais.includes('Séries');
-  }
-
-  // Verifica se falta Tempo
-  function faltamTempo(essenciais) {
-    return essenciais.includes('Tempo');
-  }
-
-  // Gera a mensagem de alerta com base nos parâmetros fornecidos
-  function gerarMensagem(camposPrincipais, campoAlternativo, outrosFaltantes) {
-    let mensagem = `Por favor, preencha ${camposPrincipais.join(' e ')} ou ${campoAlternativo}.`;
-    if (outrosFaltantes.length > 0) {
-      mensagem += ` Além de ${outrosFaltantes.join(', ')}.`;
-    }
-    return mensagem;
-  }
 }
 
 export function adicionarBotaoGerenciarExercicios() {
