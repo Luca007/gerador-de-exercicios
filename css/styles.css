@@ -11,6 +11,11 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 15px;
+  margin-top: 5dvh;
+}
+
+.title {
+  margin-bottom: 3rem;
 }
 
 /* Ajuste de imagens e vídeos */
@@ -62,6 +67,11 @@ video {
   background-color: #2e2e2e;
   border: 1px solid #444;
   color: #f0f0f0;
+  border-radius: 5px;
+  padding: 7px;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  width: inherit;
 }
 
 .form-control:focus {
@@ -81,23 +91,61 @@ video {
   align-items: center;
 }
 
+#explicacao {
+  height: clamp(100px, 10vh, 200px);
+}
+
 /* Botões */
 .btn {
   border-radius: 30px;
   padding: 10px 20px;
   font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  justify-self: center;
+  justify-content: center;
+  align-items: center;
+  width: 33dvw;
 }
 
-.btn-primary {
-  background-color: #ffcc00;
-  border-color: #ffcc00;
-  color: #1e1e1e;
+.btn-success {
+  background-color: green;
+  border-color: rgb(0, 87, 0);
+  border: 2px solid rgb(0, 87, 0);
+  color: #ffffff;
 }
 
-.btn-primary:hover {
-  background-color: #e6b800;
-  border-color: #e6b800;
-  color: #1e1e1e;
+.btn-success:hover {
+  background-color: #003f15;
+  border-color: #1e7e34;
+  color: #ffffff;
+}
+
+.btn-danger {
+  background-color: red;
+  border-color: rgb(174, 0, 0);
+  border: 2px solid rgb(174, 0, 0);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background-color: rgb(159, 0, 0);
+  border-color: rgb(255, 43, 43);
+  color: #ffffff;
+}
+
+.btn-info {
+  background-color: blue;
+  border-color: blue;
+  border: 2px solid rgb(40, 40, 253);
+  color: #ffffff;
+  margin-bottom: 5rem;
+}
+
+.btn-info:hover {
+  background-color: rgb(0, 0, 102);
+  border-color: rgb(67, 67, 255);
+  color: #ffffff;
 }
 
 .btn-secondary {
@@ -115,15 +163,6 @@ video {
   background-color: #666;
   border-color: #666;
   color: #f0f0f0;
-}
-
-.btn-info {
-  max-width: 500px;
-  margin-bottom: 5rem;
-  display: flex;
-  justify-content: center;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* Títulos */

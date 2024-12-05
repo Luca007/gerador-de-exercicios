@@ -593,7 +593,7 @@ export function adicionarBotaoGerenciarExercicios() {
   const manageButton = document.createElement('button');
   manageButton.id = 'manage-exercises-button';
   manageButton.innerText = 'Gerenciar Exercícios';
-  manageButton.className = 'btn btn-info btn-block mt-3';
+  manageButton.className = 'btn btn-info btn-block';
 
   manageButton.addEventListener('click', () => {
     criarGerenciamentoExercicios();

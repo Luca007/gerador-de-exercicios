@@ -6,7 +6,7 @@
   <!-- Meta tag para responsividade -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Importando o Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
   <!-- Fonte Roboto -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <!-- Font Awesome CSS -->
@@ -25,13 +25,8 @@
   <link rel="stylesheet" href="css/inputTime.css">
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="/gerador-de-exercicios/">Gerador de Treinos</a>
-  </nav>
-
-  <div class="container mt-5">
-    <h1 class="text-center mb-4">Gerador de Treinos</h1>
+  <div class="container">
+    <h1 class="text-center title"><a href="/gerador-de-exercicios/">Gerador de Treinos</a></h1>
 
     <!-- Formulário para gerar treinos -->
     <form id="treino-form" class="mx-auto treino-form">
@@ -54,23 +49,40 @@
         </div>
       </div>
 
-      <div class="options-container" id="optionsContainer1">
-        <div class="selection-indicator" id="selectionIndicator1"></div>
-        <div class="hover-effect-top" id="hoverEffectTop1"></div>
-        <div class="hover-effect-bottom" id="hoverEffectBottom1"></div>
-        <div class="option selected" data-value="todos">Todos</div>
-        <div class="option" data-value="iniciante">Iniciante</div>
-        <div class="option" data-value="intermediario">Intermediário</div>
-        <div class="option" data-value="avancado">Avançado</div>
+      <div class="options-container" id="optionContainer1">
+        <input type="radio" name="options1" id="option1-1" checked>
+        <label for="option1-1" class="option">Todos</label>
+      
+        <input type="radio" name="options1" id="option1-2">
+        <label for="option1-2" class="option">Iniciante</label>
+      
+        <input type="radio" name="options1" id="option1-3">
+        <label for="option1-3" class="option">Intermediário</label>
+      
+        <input type="radio" name="options1" id="option1-4">
+        <label for="option1-4" class="option">Avançado</label>
+      
+        <div class="selection-indicator"></div>
+        <div class="hover-effect-top"></div>
+        <div class="hover-effect-bottom"></div>
       </div>
-      <div class="options-container" id="optionsContainer2">
-          <div class="selection-indicator" id="selectionIndicator2"></div>
-          <div class="hover-effect-top" id="hoverEffectTop2"></div>
-          <div class="hover-effect-bottom" id="hoverEffectBottom2"></div>
-          <div class="option selected" data-value="todos">Todos</div>
-          <div class="option" data-value="criança">Criança</div>
-          <div class="option" data-value="adulto">Adulto</div>
-          <div class="option" data-value="idoso">Idoso</div>
+      
+      <div class="options-container" id="optionContainer2">
+        <input type="radio" name="options2" id="option2-1" checked>
+        <label for="option2-1" class="option">Todos</label>
+      
+        <input type="radio" name="options2" id="option2-2">
+        <label for="option2-2" class="option">Criança</label>
+      
+        <input type="radio" name="options2" id="option2-3">
+        <label for="option2-3" class="option">Adulto</label>
+      
+        <input type="radio" name="options2" id="option2-4">
+        <label for="option2-4" class="option">Idoso</label>
+      
+        <div class="selection-indicator"></div>
+        <div class="hover-effect-top"></div>
+        <div class="hover-effect-bottom"></div>
       </div>
 
       <button type="submit" class="button-generate-exercise">

@@ -14,6 +14,8 @@
   border-radius: 11px;
   cursor: pointer;
   font-size: 19.8px;
+  margin-bottom: 4rem;
+  margin-top: 2rem;
 }
 
 .button-generate-exercise::before {

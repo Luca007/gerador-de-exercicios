@@ -5,51 +5,18 @@
     padding: 20px;
     background-color: #f0f0f0;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     width: 80%;
     max-width: 500px;
-    margin-bottom: 5dvh;
-    margin-top: 2dvh;
+    margin-bottom: 3rem;
+    margin-top: 2vh;
+    overflow: hidden;
 }
-.hover-effect-top, .hover-effect-bottom {
-    position: absolute;
-    left: 0;
-    width: 0;
-    height: 0;
-    background-color: rgba(80, 80, 80, 0.5);
-    transition: all 0.6s ease;
-    pointer-events: none;
-    border-radius: 8px;
+
+.options-container input[type="radio"] {
+    display: none;
 }
-.hover-effect-top {
-    top: 0;
-    height: calc(50% - 20px);
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-.hover-effect-bottom {
-    bottom: 0;
-    height: calc(50% - 20px);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-}
-.selection-indicator {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 0;
-    height: 0;
-    background: rgba(128, 0, 128, 0.3);
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 100, 200, 0.7), 0 0 20px rgba(255, 20, 147, 0.5);
-    transition: all 1s ease;
-    pointer-events: none;
-    transform: translateY(-50%);
-}
+
 .option {
     position: relative;
     padding: 12px 20px;
@@ -62,61 +29,460 @@
     z-index: 1;
     background-color: transparent;
 }
-.option.selected {
+
+.options-container input[type="radio"]:checked + label {
     transform: scale(1.05);
     color: #ffffff;
     background: linear-gradient(135deg, rgba(150, 0, 150, 0.9), rgba(0, 100, 200, 0.9), rgba(255, 20, 147, 0.9));
 }
 
-/* Estilos responsivos */
+.selection-indicator {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    width: 25%; /* Ajuste conforme o número de opções */
+    height: 52px;
+    background: rgba(128, 0, 128, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 100, 200, 0.7), 0 0 20px rgba(255, 20, 147, 0.5);
+    transition: left 1s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Barras de Hover */
+.hover-effect-top,
+.hover-effect-bottom {
+    position: absolute;
+    width: 23%;
+    height: 10px;
+    background-color: rgba(80, 80, 80, 0.5);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hover-effect-top {
+    top: 0;
+    left: 17px;
+    border-radius: 0 0 8px 8px;
+}
+
+.hover-effect-bottom {
+    bottom: 0;
+    left: 17px;
+    border-radius: 8px 8px 0 0;
+}
+
+
+/* Aumenta a altura das barras ao passar o mouse */
+.option:hover ~ .hover-effect-top,
+.option:hover ~ .hover-effect-bottom {
+    height: 19px;
+}
+
+/* Transição suave ao mover o mouse */
+.hover-effect-top,
+.hover-effect-bottom {
+    transition: left 1s ease, height 0.8s ease, width 0.5s ease;
+}
+
+/* Posições do indicador de seleção para o primeiro container */
+.options-container input#option1-1:checked ~ .selection-indicator {
+    left: 16px;
+    width: 115px;
+}
+/* Hover da opção 1 */
+.options-container input#option1-1:checked ~ .hover-effect-top,
+.options-container input#option1-1:checked ~ .hover-effect-bottom,
+#optionContainer1 label.option:nth-of-type(1):hover ~ .hover-effect-top,
+#optionContainer1 label.option:nth-of-type(1):hover ~ .hover-effect-bottom {
+    left: 17px;
+    width: 115px;
+}
+
+
+/* Opção 2 */
+.options-container input#option1-2:checked ~ .selection-indicator {
+    left: 123px;
+    width: 115px;
+}
+/* Hover da opção 2 */
+.options-container input#option1-2:checked ~ .hover-effect-top,
+.options-container input#option1-2:checked ~ .hover-effect-bottom,
+#optionContainer1 label.option:nth-of-type(2):hover ~ .hover-effect-top,
+#optionContainer1 label.option:nth-of-type(2):hover ~ .hover-effect-bottom {
+    left: 123px;
+    width: 115px;
+}
+
+
+/* Opção 3 */
+.options-container input#option1-3:checked ~ .selection-indicator {
+    left: 230px;
+    width: 145px;
+}
+/* Hover da opção 3 */
+.options-container input#option1-3:checked ~ .hover-effect-top,
+.options-container input#option1-3:checked ~ .hover-effect-bottom,
+#optionContainer1 label.option:nth-of-type(3):hover ~ .hover-effect-top,
+#optionContainer1 label.option:nth-of-type(3):hover ~ .hover-effect-bottom {
+    left: 231px;
+    width: 143px;
+}
+
+
+/* Opção 4 */
+.options-container input#option1-4:checked ~ .selection-indicator {
+    left: 366px;
+    width: 118px;
+}
+/* Hover da opção 4 */
+.options-container input#option1-4:checked ~ .hover-effect-top,
+.options-container input#option1-4:checked ~ .hover-effect-bottom,
+#optionContainer1 label.option:nth-of-type(4):hover ~ .hover-effect-top,
+#optionContainer1 label.option:nth-of-type(4):hover ~ .hover-effect-bottom {
+    left: 367px;
+    width: 118px;
+}
+
+
+/* Posições do indicador de seleção para o segundo container */
+.options-container input#option2-1:checked ~ .selection-indicator {
+    left: 16px;
+    width: 123px;
+}
+/* Hover da opção 1 */
+.options-container input#option2-1:checked ~ .hover-effect-top,
+.options-container input#option2-1:checked ~ .hover-effect-bottom,
+#optionContainer2 label.option:nth-of-type(1):hover ~ .hover-effect-top,
+#optionContainer2 label.option:nth-of-type(1):hover ~ .hover-effect-bottom {
+    left: 17px;
+    width: 121px;
+}
+
+/* Opção 2 */
+.options-container input#option2-2:checked ~ .selection-indicator {
+    left: 131px;
+    width: 123px;
+}
+/* Hover da opção 2 */
+.options-container input#option2-2:checked ~ .hover-effect-top,
+.options-container input#option2-2:checked ~ .hover-effect-bottom,
+#optionContainer2 label.option:nth-of-type(2):hover ~ .hover-effect-top,
+#optionContainer2 label.option:nth-of-type(2):hover ~ .hover-effect-bottom {
+    left: 132px;
+    width: 121px;
+}
+
+
+/* Opção 3 */
+.options-container input#option2-3:checked ~ .selection-indicator {
+    left: 246px;
+    width: 123px;
+}
+/* Hover da opção 3 */
+.options-container input#option2-3:checked ~ .hover-effect-top,
+.options-container input#option2-3:checked ~ .hover-effect-bottom,
+#optionContainer2 label.option:nth-of-type(3):hover ~ .hover-effect-top,
+#optionContainer2 label.option:nth-of-type(3):hover ~ .hover-effect-bottom {
+    left: 247px;
+    width: 121px;
+}
+
+
+/* Opção 4 */
+.options-container input#option2-4:checked ~ .selection-indicator {
+    left: 361px;
+    width: 123px;
+}
+/* Hover da opção 4 */
+.options-container input#option2-4:checked ~ .hover-effect-top,
+.options-container input#option2-4:checked ~ .hover-effect-bottom,
+#optionContainer2 label.option:nth-of-type(4):hover ~ .hover-effect-top,
+#optionContainer2 label.option:nth-of-type(4):hover ~ .hover-effect-bottom {
+    left: 362px;
+    width: 121px;
+}
+
+/* Responsividade */
 @media (max-width: 768px) {
     .options-container {
+        align-items: center;
+        justify-content: center;
         flex-direction: column;
-        width: 90%;
+        width: 80dvw;
     }
 
     .option {
         margin-bottom: 10px;
-        width: 100%;
+        width: 95%;
     }
 
     .option:last-child {
         margin-bottom: 0;
     }
 
-    /* Ajustes para as barras laterais */
-    .hover-effect-top, .hover-effect-bottom {
-        position: absolute;
-        width: 8px; /* Largura fixa para as barras laterais */
-        background-color: rgba(80, 80, 80, 0.5);
-        transition: all 0.6s ease;
-        pointer-events: none;
-    }
-    .hover-effect-top {
-        /* Barra esquerda */
-        border-radius: 0 8px 8px 0;
-        left: 0;
-        top: 0;
-        height: 0; /* Será ajustado via JS */
-    }
-    .hover-effect-bottom {
-        /* Barra direita */
-        border-radius: 8px 0 0 8px;
-        right: 0;
-        top: 0;
-        height: 0; /* Será ajustado via JS */
+    .selection-indicator {
+        width: clamp(100px, 70vw, 461px) !important;
+        height: 52px;
+        top: 18px;
+        left: 20px;
+        transition: top 1s ease;
     }
 
-    .selection-indicator {
-        position: absolute;
+    /* Barras de Hover para Mobile */
+    .hover-effect-top,
+    .hover-effect-bottom {
+        width: 13px;
+        height: 25%;
+        transition: top 1s ease !important;
+    }
+
+    .hover-effect-top {
         top: 0;
         left: 0;
-        width: 0;
-        height: 0;
-        background: rgba(128, 0, 128, 0.3);
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 100, 200, 0.7), 0 0 20px rgba(255, 20, 147, 0.5);
-        transition: all 1s ease;
-        pointer-events: none;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .hover-effect-bottom {
+        top: 0;
+        right: 0;
+        border-radius: 8px 0 0 8px;
+    }
+
+    /* Aumenta a largura das barras ao passar o mouse no mobile */
+    .option:hover ~ .hover-effect-top,
+    .option:hover ~ .hover-effect-bottom {
+        width: 21px;
+    }
+
+    /* Ajuste das posições verticais do indicador de seleção do primeiro container */
+    .options-container input#option1-1:checked ~ .selection-indicator {
+        top: 18px;
+        left: 20px;
+        height: 52px;
+    }
+    /* Hover da opção 1 */
+    .options-container input#option1-1:checked ~ .hover-effect-top,
+    .options-container input#option1-1:checked ~ .hover-effect-bottom,
+    #optionContainer1 label.option:nth-of-type(1):hover ~ .hover-effect-top,
+    #optionContainer1 label.option:nth-of-type(1):hover ~ .hover-effect-bottom {
+        top: 19px;
+        width: 13px;
+        height: 50px;
+    }
+    /* Hover top opção 1 */
+    .options-container input#option1-1:checked ~ .hover-effect-top,
+    #optionContainer1 label.option:nth-of-type(1):hover ~ .hover-effect-top {
+        left: 0;
+    }
+    /* Hover bottom opção 1 */
+    .options-container input#option1-1:checked ~ .hover-effect-bottom,
+    #optionContainer1 label.option:nth-of-type(1):hover ~ .hover-effect-bottom {
+        right: 0;
+        left: calc(100% - 13px);
+    }
+
+
+    /* Opção 2 */
+    .options-container input#option1-2:checked ~ .selection-indicator {
+        top: 76px;
+        left: 20px;
+        height: 52px;
+    }
+    /* Hover da opção 2 */
+    .options-container input#option1-2:checked ~ .hover-effect-top,
+    .options-container input#option1-2:checked ~ .hover-effect-bottom,
+    #optionContainer1 label.option:nth-of-type(2):hover ~ .hover-effect-top,
+    #optionContainer1 label.option:nth-of-type(2):hover ~ .hover-effect-bottom {
+        top: 77px;
+        width: 13px;
+        height: 50px;
+    }
+    /* Hover top opção 2 */
+    .options-container input#option1-2:checked ~ .hover-effect-top,
+    #optionContainer1 label.option:nth-of-type(2):hover ~ .hover-effect-top {
+        left: 0;
+    }
+    /* Hover bottom opção 2 */
+    .options-container input#option1-2:checked ~ .hover-effect-bottom,
+    #optionContainer1 label.option:nth-of-type(2):hover ~ .hover-effect-bottom {
+        right: 0;
+        left: calc(100% - 13px);
+    }
+
+
+    /* Opção 3 */
+    .options-container input#option1-3:checked ~ .selection-indicator {
+        top: 134px;
+        left: 20px;
+        height: 52px;
+    }
+    /* Hover da opção 3 */
+    .options-container input#option1-3:checked ~ .hover-effect-top,
+    .options-container input#option1-3:checked ~ .hover-effect-bottom,
+    #optionContainer1 label.option:nth-of-type(3):hover ~ .hover-effect-top,
+    #optionContainer1 label.option:nth-of-type(3):hover ~ .hover-effect-bottom {
+        top: 135px;
+        width: 13px;
+        height: 50px;
+    }
+    /* Hover top opção 3 */
+    .options-container input#option1-3:checked ~ .hover-effect-top,
+    #optionContainer1 label.option:nth-of-type(3):hover ~ .hover-effect-top {
+        left: 0;
+    }
+    /* Hover bottom opção 3 */
+    .options-container input#option1-3:checked ~ .hover-effect-bottom,
+    #optionContainer1 label.option:nth-of-type(3):hover ~ .hover-effect-bottom {
+        right: 0;
+        left: calc(100% - 13px);
+    }
+
+
+    /* Opção 4 */
+    .options-container input#option1-4:checked ~ .selection-indicator {
+        top: 192px;
+        left: 20px;
+        height: 52px;
+    }
+    /* Hover da opção 4 */
+    .options-container input#option1-4:checked ~ .hover-effect-top,
+    .options-container input#option1-4:checked ~ .hover-effect-bottom,
+    #optionContainer1 label.option:nth-of-type(4):hover ~ .hover-effect-top,
+    #optionContainer1 label.option:nth-of-type(4):hover ~ .hover-effect-bottom {
+        top: 193px;
+        width: 13px;
+        height: 50px;
+    }
+    /* Hover top opção 4 */
+    .options-container input#option1-4:checked ~ .hover-effect-top,
+    #optionContainer1 label.option:nth-of-type(4):hover ~ .hover-effect-top {
+        left: 0;
+    }
+    /* Hover bottom opção 4 */
+    .options-container input#option1-4:checked ~ .hover-effect-bottom,
+    #optionContainer1 label.option:nth-of-type(4):hover ~ .hover-effect-bottom {
+        right: 0;
+        left: calc(100% - 13px);
+    }
+
+
+    /* Ajuste das posições verticais do indicador de seleção do segundo container */
+    .options-container input#option2-1:checked ~ .selection-indicator {
+        top: 18px;
+        left: 20px;
+        height: 52px;
+    }
+    /* Hover da opção 1 */
+    .options-container input#option2-1:checked ~ .hover-effect-top,
+    .options-container input#option2-1:checked ~ .hover-effect-bottom,
+    #optionContainer2 label.option:nth-of-type(1):hover ~ .hover-effect-top,
+    #optionContainer2 label.option:nth-of-type(1):hover ~ .hover-effect-bottom {
+        top: 19px;
+        width: 13px;
+        height: 50px;
+    }
+    /* Hover top opção 1 */
+    .options-container input#option2-1:checked ~ .hover-effect-top,
+    #optionContainer2 label.option:nth-of-type(1):hover ~ .hover-effect-top {
+        left: 0;
+    }
+    /* Hover bottom opção 1 */
+    .options-container input#option2-1:checked ~ .hover-effect-bottom,
+    #optionContainer2 label.option:nth-of-type(1):hover ~ .hover-effect-bottom {
+        right: 0;
+        left: calc(100% - 13px);
+    }
+
+
+    /* Opção 2 */
+    .options-container input#option2-2:checked ~ .selection-indicator {
+        top: 76px;
+        left: 20px;
+        height: 52px;
+    }
+    /* Hover da opção 2 */
+    .options-container input#option2-2:checked ~ .hover-effect-top,
+    .options-container input#option2-2:checked ~ .hover-effect-bottom,
+    #optionContainer2 label.option:nth-of-type(2):hover ~ .hover-effect-top,
+    #optionContainer2 label.option:nth-of-type(2):hover ~ .hover-effect-bottom {
+        top: 77px;
+        width: 13px;
+        height: 50px;
+    }
+    /* Hover top opção 2 */
+    .options-container input#option2-2:checked ~ .hover-effect-top,
+    #optionContainer2 label.option:nth-of-type(2):hover ~ .hover-effect-top {
+        left: 0;
+    }
+    /* Hover bottom opção 2 */
+    .options-container input#option2-2:checked ~ .hover-effect-bottom,
+    #optionContainer2 label.option:nth-of-type(2):hover ~ .hover-effect-bottom {
+        right: 0;
+        left: calc(100% - 13px);
+    }
+
+
+    /* Opção 3 */
+    .options-container input#option2-3:checked ~ .selection-indicator {
+        top: 134px;
+        left: 20px;
+        height: 52px;
+    }
+    /* Hover da opção 3 */
+    .options-container input#option2-3:checked ~ .hover-effect-top,
+    .options-container input#option2-3:checked ~ .hover-effect-bottom,
+    #optionContainer2 label.option:nth-of-type(3):hover ~ .hover-effect-top,
+    #optionContainer2 label.option:nth-of-type(3):hover ~ .hover-effect-bottom {
+        top: 135px;
+        width: 13px;
+        height: 50px;
+    }
+    /* Hover top opção 3 */
+    .options-container input#option2-3:checked ~ .hover-effect-top,
+    #optionContainer2 label.option:nth-of-type(3):hover ~ .hover-effect-top {
+        left: 0;
+    }
+    /* Hover bottom opção 3 */
+    .options-container input#option2-3:checked ~ .hover-effect-bottom,
+    #optionContainer2 label.option:nth-of-type(3):hover ~ .hover-effect-bottom {
+        right: 0;
+        left: calc(100% - 13px);
+    }
+
+
+    /* Opção 4 */
+    .options-container input#option2-4:checked ~ .selection-indicator {
+        top: 192px;
+        left: 20px;
+        height: 52px;
+    }
+    /* Hover da opção 4 */
+    .options-container input#option2-4:checked ~ .hover-effect-top,
+    .options-container input#option2-4:checked ~ .hover-effect-bottom,
+    #optionContainer2 label.option:nth-of-type(4):hover ~ .hover-effect-top,
+    #optionContainer2 label.option:nth-of-type(4):hover ~ .hover-effect-bottom {
+        top: 193px;
+        width: 13px;
+        height: 50px;
+    }
+    /* Hover top opção 4 */
+    .options-container input#option2-4:checked ~ .hover-effect-top,
+    #optionContainer2 label.option:nth-of-type(4):hover ~ .hover-effect-top {
+        left: 0;
+    }
+    /* Hover bottom opção 4 */
+    .options-container input#option2-4:checked ~ .hover-effect-bottom,
+    #optionContainer2 label.option:nth-of-type(4):hover ~ .hover-effect-bottom {
+        right: 0;
+        left: calc(100% - 13px);
+    }
+}
+
+@media (max-width: 500px) {
+    .selection-indicator {
+        width: clamp(100px, 71.9dvw, 360px) !important;
     }
 }
