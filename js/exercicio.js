@@ -6,6 +6,12 @@ import {
 } from './firestore.js';
 import { criarFormulario } from './formGenerator.js';
 import { createAdminInterface } from './admin.js';
+import {
+  setupCheckboxGroupLogic,
+  handleAllSelected,
+  updateFieldRequirements,
+  extractFormData
+} from './formUtils.js';
 
 // Função para criar o gerenciamento de exercícios
 export function criarGerenciamentoExercicios() {
@@ -458,150 +464,15 @@ function editarExercicio(exercise) {
   // Aplicar máscaras de entrada
   applyInputMasks();
 
-  // Função para atualizar a obrigatoriedade dos campos
-  function updateFieldRequirements() {
-    const tempoVal = $('#tempo-admin').val().trim();
-    const repeticoesInput = $('#repeticoes');
-    const seriesInput = $('#series');
-
-    if (tempoVal === '') {
-      // Tempo não preenchido, séries e repetições são obrigatórios
-      repeticoesInput.data('required', true);
-      seriesInput.data('required', true);
-    } else {
-      // Tempo preenchido, séries e repetições não são obrigatórios
-      repeticoesInput.data('required', false);
-      seriesInput.data('required', false);
-    }
-  }
-
   // Adicionar eventos após elementos existirem no DOM
   $('#tempo-admin').on('input', updateFieldRequirements);
 
   // Atualizar a obrigatoriedade inicial
   updateFieldRequirements();
 
-  // Função para configurar a lógica dos grupos de checkboxes
-  function setupCheckboxGroupLogic(fieldId) {
-    const checkboxes = document.querySelectorAll(`input[name="${fieldId}"]`);
-    const todosCheckbox = document.querySelector(
-      `input[name="${fieldId}"][value="todos"]`
-    );
-    const nenhumCheckbox = document.querySelector(
-      `input[name="${fieldId}"][value="nenhum"]`
-    );
-    const otherCheckboxes = Array.from(checkboxes).filter(
-      (cb) => cb !== todosCheckbox && cb !== nenhumCheckbox
-    );
-
-    checkboxes.forEach((checkbox) => {
-      checkbox.addEventListener('change', () => {
-        handleCheckboxChange(checkbox, {
-          checkboxes,
-          todosCheckbox,
-          nenhumCheckbox,
-          otherCheckboxes
-        });
-      });
-    });
-  }
-
-  function handleCheckboxChange(
-    checkbox,
-    { checkboxes, todosCheckbox, nenhumCheckbox, otherCheckboxes }
-  ) {
-    if (checkbox === todosCheckbox && todosCheckbox.checked) {
-      marcarTodos(todosCheckbox, nenhumCheckbox, otherCheckboxes);
-    } else if (checkbox === nenhumCheckbox && nenhumCheckbox.checked) {
-      marcarNenhum(nenhumCheckbox, checkboxes, todosCheckbox);
-    } else {
-      atualizarOutrasOpcoes(todosCheckbox, nenhumCheckbox, otherCheckboxes);
-    }
-  }
-  
-  function marcarTodos(todosCheckbox, nenhumCheckbox, otherCheckboxes) {
-    // 'todos' foi marcado, marcar todas as outras opções, exceto 'nenhum'
-    otherCheckboxes.forEach((cb) => (cb.checked = true));
-    if (nenhumCheckbox) nenhumCheckbox.checked = false;
-  }
-  
-  function marcarNenhum(nenhumCheckbox, checkboxes, todosCheckbox) {
-    // 'nenhum' foi marcado, desmarcar todas as outras opções
-    checkboxes.forEach((cb) => {
-      if (cb !== nenhumCheckbox) {
-        cb.checked = false;
-      }
-    });
-    if (todosCheckbox) todosCheckbox.checked = false;
-  }
-  
-  function atualizarOutrasOpcoes(todosCheckbox, nenhumCheckbox, otherCheckboxes) {
-    // Verificar se todas as outras opções estão marcadas
-    const todasMarcadas = otherCheckboxes.every((cb) => cb.checked);
-  
-    // Atualizar o checkbox 'todos'
-    if (todosCheckbox) {
-      todosCheckbox.checked = todasMarcadas;
-    }
-  
-    // Verificar se alguma opção está marcada
-    const algumaMarcada = otherCheckboxes.some((cb) => cb.checked);
-  
-    // Desmarcar 'nenhum' se alguma opção estiver marcada
-    if (nenhumCheckbox && algumaMarcada) {
-      nenhumCheckbox.checked = false;
-    }
-  
-    // Desmarcar 'todos' se nem todas as opções estão marcadas
-    if (todosCheckbox && !todasMarcadas) {
-      todosCheckbox.checked = false;
-    }
-  }
-  
-  // Após o formulário ser adicionado ao DOM
+  // Configurar a lógica dos grupos de checkboxes
   setupCheckboxGroupLogic('impulso');
   setupCheckboxGroupLogic('etaria');
-
-  // Função para validar os dados do formulário
-  function validateFormData(formData) {
-    // Lista de campos obrigatórios
-    const camposObrigatorios = [
-      { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
-      { campo: 'explicacao', nomeExibicao: 'Explicação' },
-      { campo: 'impulsoSelectedOptions', nomeExibicao: 'Equipamento' },
-      { campo: 'categoriaEtariaSelectedOptions', nomeExibicao: 'Categoria Etária' },
-      { campo: 'categoria', nomeExibicao: 'Categoria' },
-      { campo: 'nivel', nomeExibicao: 'Nível' }
-    ];
-
-    // Se 'tempo' não estiver preenchido, 'repeticoes' e 'series' são obrigatórios
-    if (!formData.tempo) {
-      camposObrigatorios.push(
-        { campo: 'repeticoes', nomeExibicao: 'Repetições' },
-        { campo: 'series', nomeExibicao: 'Séries' }
-      );
-    }
-
-    // Verificar quais campos estão faltando
-    const camposFaltantes = camposObrigatorios.filter(({ campo }) => {
-      const valor = formData[campo];
-      return (
-        valor === undefined ||
-        valor === null ||
-        (typeof valor === 'string' && valor.trim() === '') ||
-        (Array.isArray(valor) && valor.length === 0)
-      );
-    }).map(({ nomeExibicao }) => nomeExibicao);
-
-    // Se houver campos faltantes, exibir alerta
-    if (camposFaltantes.length > 0) {
-      exibirAlerta('aviso', 'Por favor, preencha os seguintes campos: ' + camposFaltantes.join(', '));
-      return false;
-    }
-
-    return true;
-  }
-
 
   // Manipulador de submissão do formulário
   form.addEventListener('submit', async (e) => {
@@ -613,24 +484,6 @@ function editarExercicio(exercise) {
       return;
     }
 
-    // Função para tratar seleção de todas as opções
-    function handleAllSelected(selectedOptions, allOptions, allOptionValue) {
-      const optionsWithoutAll = allOptions.filter((option) => option !== allOptionValue);
-    
-      // Verificar se todas as opções, exceto 'todos', estão selecionadas
-      const allOptionsSelected = optionsWithoutAll.every((option) =>
-        selectedOptions.includes(option)
-      );
-    
-      if (allOptionsSelected) {
-        // Se todas as opções estiverem selecionadas, retornar ['todos']
-        return [allOptionValue];
-      } else {
-        // Caso contrário, retornar as opções selecionadas sem 'todos'
-        return selectedOptions.filter((value) => value !== allOptionValue);
-      }
-    }
-    
     // Obter todas as opções disponíveis para impulso e categoria etária
     const impulsoOptions = [
       ...document.querySelectorAll(`input[name="impulso"]`)
@@ -688,42 +541,94 @@ function editarExercicio(exercise) {
     }, 3000);
   });
 
-  function extractFormData() {
-    const nome = $('#nome').val().trim();
-    const explicacao = $('#explicacao').val().trim();
+  // Função para validar os dados do formulário
+  function validateFormData(formData) {
+    // Lista de campos obrigatórios
+    const camposObrigatorios = [
+      { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
+      { campo: 'explicacao', nomeExibicao: 'Explicação' },
+      { campo: 'impulsoSelectedOptions', nomeExibicao: 'Equipamento' },
+      { campo: 'categoriaEtariaSelectedOptions', nomeExibicao: 'Categoria Etária' },
+      { campo: 'categoria', nomeExibicao: 'Categoria' },
+      { campo: 'nivel', nomeExibicao: 'Nível' }
+    ];
 
-    const impulsoCheckboxes = document.querySelectorAll(
-      'input[name="impulso"]:checked'
+    // Se 'tempo' não estiver preenchido, 'repeticoes' e 'series' são obrigatórios
+    if (!formData.tempo) {
+      camposObrigatorios.push(
+        { campo: 'repeticoes', nomeExibicao: 'Repetições' },
+        { campo: 'series', nomeExibicao: 'Séries' }
+      );
+    }
+
+    // Verificar quais campos estão faltando
+    const camposFaltantes = camposObrigatorios
+      .filter(({ campo }) => isCampoFaltante(formData[campo]))
+      .map(({ nomeExibicao }) => nomeExibicao);
+
+    // Se houver campos faltantes, exibir alerta
+    if (camposFaltantes.length > 0) {
+      const mensagem = construirMensagem(camposFaltantes);
+      exibirAlerta('aviso', mensagem);
+      return false;
+    }
+
+    return true;
+  }
+
+  // Função para verificar se o campo está faltando
+  function isCampoFaltante(valor) {
+    return (
+      valor === undefined ||
+      valor === null ||
+      (typeof valor === 'string' && valor.trim() === '') ||
+      (Array.isArray(valor) && valor.length === 0)
     );
-    const impulsoSelectedOptions = Array.from(impulsoCheckboxes).map(
-      (cb) => cb.value
-    );
+  }
 
-    const categoriaEtariaCheckboxes = document.querySelectorAll(
-      'input[name="etaria"]:checked'
-    );
-    const categoriaEtariaSelectedOptions = Array.from(
-      categoriaEtariaCheckboxes
-    ).map((cb) => cb.value);
+  // Função para construir a mensagem de alerta baseada nos campos faltantes
+  function construirMensagem(camposFaltantes) {
+    const essenciais = ['Repetições', 'Séries', 'Tempo'];
+    const essenciaisFaltantes = camposFaltantes.filter(campo => essenciais.includes(campo));
+    const outrosFaltantes = camposFaltantes.filter(campo => !essenciais.includes(campo));
 
-    const categoria = $('#categoria').val();
-    const nivel = $('#nivel').val();
-    const repeticoes = $('#repeticoes').val().replace(/\D/g, '') || null;
-    const series = $('#series').val().replace(/\D/g, '') || null;
-    const tempoVal = $('#tempo-admin').val().replace(/\D/g, '');
-    const tempo = tempoVal ? parseInt(tempoVal) : null;
+    if (todosEssenciaisFaltando(essenciaisFaltantes)) {
+      return gerarMensagem(['Repetições', 'Séries'], 'Tempo', outrosFaltantes);
+    }
 
-    return {
-      nome,
-      explicacao,
-      impulsoSelectedOptions,
-      categoriaEtariaSelectedOptions,
-      categoria,
-      nivel,
-      repeticoes,
-      series,
-      tempo
-    };
+    if (faltamRepeticoesSeries(essenciaisFaltantes) || faltamTempo(essenciaisFaltantes)) {
+      return gerarMensagem(['Repetições', 'Séries'], 'Tempo', outrosFaltantes);
+    }
+
+    if (camposFaltantes.length === 1) {
+      return `Por favor, preencha o seguinte campo: ${camposFaltantes[0]}`;
+    }
+
+    return `Por favor, preencha os seguintes campos: ${camposFaltantes.join(', ')}`;
+  }
+
+  // Verifica se todos os essenciais estão faltando
+  function todosEssenciaisFaltando(essenciais) {
+    return essenciais.length === 3;
+  }
+
+  // Verifica se faltam Repetições e Séries
+  function faltamRepeticoesSeries(essenciais) {
+    return essenciais.includes('Repetições') && essenciais.includes('Séries');
+  }
+
+  // Verifica se falta Tempo
+  function faltamTempo(essenciais) {
+    return essenciais.includes('Tempo');
+  }
+
+  // Gera a mensagem de alerta com base nos parâmetros fornecidos
+  function gerarMensagem(camposPrincipais, campoAlternativo, outrosFaltantes) {
+    let mensagem = `Por favor, preencha ${camposPrincipais.join(' e ')} ou ${campoAlternativo}.`;
+    if (outrosFaltantes.length > 0) {
+      mensagem += ` Além de ${outrosFaltantes.join(', ')}.`;
+    }
+    return mensagem;
   }
 }
 
