@@ -15,4 +15,5 @@ onAuthStateChanged(auth, (user) => {
   }
   // Esconder o loader após resolver o estado de autenticação e carregar a interface
   loader.style.display = 'none';
+  document.body.classList.remove('no-scroll');
 });

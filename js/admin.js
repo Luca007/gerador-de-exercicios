@@ -203,15 +203,18 @@ function setupFormEvents(form) {
     const password = form.password.value;
 
     // Mostrar o loader
-    loader.style.display = 'block';
+    loader.style.display = 'flex';
+    document.body.classList.add('no-scroll');
 
     if (!email) {
       loader.style.display = 'none';
+      document.body.classList.remove('no-scroll');
       exibirAlerta('aviso', 'Por favor, preencha o campo Email.');
       return;
     }
     if (!password) {
       loader.style.display = 'none';
+      document.body.classList.remove('no-scroll');
       exibirAlerta('aviso', 'Por favor, preencha o campo Senha.');
       return;
     }
@@ -220,6 +223,7 @@ function setupFormEvents(form) {
       .then(() => {
         // Ocultar o loader
         loader.style.display = 'none';
+        document.body.classList.remove('no-scroll');
         // Limpar o formulário
         form.reset();
         // Mostrar a interface de administrador
@@ -229,6 +233,7 @@ function setupFormEvents(form) {
       .catch((error) => {
         // Ocultar o loader
         loader.style.display = 'none';
+        document.body.classList.remove('no-scroll');
         if (
           error.code === 'auth/invalid-login-credentials' ||
           error.code === 'auth/invalid-email'
@@ -411,6 +416,7 @@ async function handleFormSubmit(e) {
 
   // Mostrar o loader
   loader.style.display = 'flex';
+  document.body.classList.add('no-scroll');
 
   try {
     await adicionarExercicio({
@@ -434,10 +440,12 @@ async function handleFormSubmit(e) {
       .forEach((cb) => (cb.checked = false));
 
     loader.style.display = 'none';
+    document.body.classList.remove('no-scroll');
   } catch (error) {
     exibirAlerta('erro', 'Erro ao adicionar exercício.');
     console.error('Erro ao adicionar exercício:', error);
     loader.style.display = 'none';
+    document.body.classList.remove('no-scroll');
   }
 }
 

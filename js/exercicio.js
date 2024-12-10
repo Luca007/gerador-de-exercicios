@@ -112,6 +112,7 @@ async function buscarEExibirExercicios() {
 
   // Mostrar o loader padrão
   loader.style.display = 'flex';
+  document.body.classList.add('no-scroll');
 
   try {
     const exercises = await obterExercicios();
@@ -119,6 +120,7 @@ async function buscarEExibirExercicios() {
 
     // Esconder o loader padrão
     loader.style.display = 'none';
+    document.body.classList.remove('no-scroll');
 
     // Exibir exercícios agrupados por categoria
     for (const category in exercisesByCategory) {
@@ -133,6 +135,7 @@ async function buscarEExibirExercicios() {
     exibirAlerta('erro', 'Erro ao obter exercícios.');
     // Esconder o loader padrão
     loader.style.display = 'none';
+    document.body.classList.remove('no-scroll');
   }
 }
 
@@ -352,6 +355,7 @@ async function excluirExercicio(exerciseId) {
   if (confirm('Tem certeza que deseja deletar este exercício?')) {
     // Mostrar o loader
     loader.style.display = 'flex';
+    document.body.classList.add('no-scroll');
 
     try {
       // Chama a função importada para deletar do Firestore
@@ -359,6 +363,7 @@ async function excluirExercicio(exerciseId) {
       exibirAlerta('sucesso', 'Exercício deletado com sucesso.');
       // Esconder o loader
       loader.style.display = 'none';
+      document.body.classList.remove('no-scroll');
       // Atualizar a lista de exercícios
       buscarEExibirExercicios();
     } catch (error) {
@@ -366,6 +371,7 @@ async function excluirExercicio(exerciseId) {
       exibirAlerta('erro', 'Erro ao deletar exercício.');
       // Esconder o loader
       loader.style.display = 'none';
+      document.body.classList.remove('no-scroll');
     }
   }
 }
@@ -507,6 +513,7 @@ function editarExercicio(exercise) {
 
     // Mostrar o loader
     loader.style.display = 'flex';
+    document.body.classList.add('no-scroll');
 
     try {
       await atualizarExercicio(exercise.id, {
@@ -527,6 +534,7 @@ function editarExercicio(exercise) {
         criarGerenciamentoExercicios();
         // Esconder o loader após os 20 ms
         loader.style.display = 'none';
+        document.body.classList.remove('no-scroll');
       }, 20);
     } catch (error) {
       console.error('Erro ao atualizar exercício:', error);
@@ -534,6 +542,7 @@ function editarExercicio(exercise) {
 
       // Esconder o loader
       loader.style.display = 'none';
+      document.body.classList.remove('no-scroll');
     }
 
     // Limpar a mensagem após algum tempo

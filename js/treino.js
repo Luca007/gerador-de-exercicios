@@ -35,6 +35,7 @@ function gerarTreino(e) {
 async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
   resultadoDiv.innerHTML = '';
   mostrarLoader();
+  document.document.body.classList.add('no-scroll');
 
   // Definir as proporções de tempo para cada categoria
   const proporcoes = {
@@ -61,11 +62,13 @@ async function montarTreino(tempoTotal, nivel, categoriaEtaria) {
 // Mostrar o loader
 function mostrarLoader() {
   loader.style.display = 'flex';
+  document.document.body.classList.add('no-scroll');
 }
 
 // Esconder o loader
 function esconderLoader() {
   loader.style.display = 'none';
+  document.document.body.classList.remove('no-scroll');
 }
 
 // Calcular o tempo para cada categoria
