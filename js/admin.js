@@ -85,6 +85,7 @@ function createEmailGroup() {
   emailInput.id = 'email';
   emailInput.type = 'text';
   emailInput.required = false;
+  emailInput.setAttribute('autocomplete', 'email');
 
   // Adicionar label e input ao grupo de email
   emailGroup.appendChild(emailLabel);
@@ -112,6 +113,7 @@ function createPasswordGroup() {
   passwordInput.type = 'password';
   passwordInput.placeholder = 'Digite sua senha';
   passwordInput.required = false;
+  passwordInput.setAttribute('autocomplete', 'current-password');
 
   const togglePasswordSpan = createTogglePassword();
 
