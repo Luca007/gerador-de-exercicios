@@ -7,25 +7,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Gerador de Treinos - Crie treinos personalizados de acordo com seu nível e disponibilidade. Escolha entre diferentes categorias e idades para otimizar seu regime de exercícios.">
   <!-- Fonte Roboto -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" crossorigin>
   <!-- Font Awesome CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <!-- Tailwind CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <!-- Seu CSS personalizado -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/loader.css">
   <link rel="stylesheet" href="css/inputTime.css">
   <link rel="stylesheet" href="css/buttonGenerate.css">
   <link rel="stylesheet" href="css/select.css">
-  <link rel="stylesheet" href="css/checkbox.css">
-  <link rel="stylesheet" href="css/loginForm.css">
-  <link rel="stylesheet" href="css/buttonDelete.css">
-  <link rel="stylesheet" href="css/buttonEdit.css">
+  <link rel="preload" href="css/checkbox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="css/checkbox.css"></noscript>
+  <link rel="preload" href="css/loginForm.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="css/loginForm.css"></noscript>
+  <link rel="preload" href="css/buttonDelete.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="css/buttonDelete.css"></noscript>
+  <link rel="preload" href="css/buttonEdit.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="css/buttonEdit.css"></noscript>
 </head>
 <body>
   <div class="container">
-    <h1 class="title"><a href="/gerador-de-exercicios/">Gerador de Treinos</a></h1>
+    <h1 class="title" style="margin-bottom: 3rem; text-align: center;"><a href="/gerador-de-exercicios/">Gerador de Treinos</a></h1>
 
     <!-- Formulário para gerar treinos -->
     <form id="treino-form" class="mx-auto treino-form">
