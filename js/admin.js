@@ -360,7 +360,7 @@ function setupEventListeners(adminSection) {
   const logoutButton = adminSection.querySelector('#logout-button');
 
   // Adicionar eventos aos campos
-  $('#tempo-admin').on('input', updateFieldRequirements);
+  document.getElementById('tempo-admin').addEventListener('input', updateFieldRequirements);
 
   // Atualizar a obrigatoriedade inicial
   updateFieldRequirements();

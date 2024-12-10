@@ -144,47 +144,41 @@ export function handleAllSelected(selectedOptions, allOptions, allOptionValue) {
 
 // Função para atualizar a obrigatoriedade dos campos
 export function updateFieldRequirements() {
-    const tempoVal = $('#tempo-admin').val().trim();
-    const repeticoesInput = $('#repeticoes');
-    const seriesInput = $('#series');
+    const tempoVal = document.getElementById('tempo-admin').value.trim();
+    const repeticoesInput = document.getElementById('repeticoes');
+    const seriesInput = document.getElementById('series');
 
     if (tempoVal === '') {
         // Tempo não preenchido, séries e repetições são obrigatórios
-        repeticoesInput.data('required', true);
-        seriesInput.data('required', true);
+        repeticoesInput.dataset.required = "true";
+        seriesInput.dataset.required = "true";
     } else {
         // Tempo preenchido, séries e repetições não são obrigatórios
-        repeticoesInput.data('required', false);
-        seriesInput.data('required', false);
+        repeticoesInput.dataset.required = "false";
+        seriesInput.dataset.required = "false";
     }
 }
 
 // Função para extrair dados do formulário
 export function extractFormData() {
-    const nome = $('#nome').val().trim();
-    const explicacao = $('#explicacao').val().trim();
+    const nome = document.getElementById('nome').value.trim();
+    const explicacao = document.getElementById('explicacao').value.trim();
 
-    const impulsoCheckboxes = document.querySelectorAll(
-        'input[name="impulso"]:checked'
-    );
+    const impulsoCheckboxes = document.querySelectorAll('input[name="impulso"]:checked');
     const impulsoSelectedOptions = Array.from(impulsoCheckboxes).map(
         (cb) => cb.value
     );
 
-    const categoriaEtariaCheckboxes = document.querySelectorAll(
-        'input[name="etaria"]:checked'
-    );
+    const categoriaEtariaCheckboxes = document.querySelectorAll('input[name="etaria"]:checked');
     const categoriaEtariaSelectedOptions = Array.from(
         categoriaEtariaCheckboxes
     ).map((cb) => cb.value);
 
-    const categoria = $('#categoria').val();
-    const nivel = $('#nivel').val();
-    const repeticoes = $('#repeticoes').val().replace(/\D/g, '') || null;
-    const series = $('#series').val().replace(/\D/g, '') || null;
-    const tempoVal = $('#tempo-admin').val().replace(/\D/g, '');
-    const tempo = tempoVal ? parseInt(tempoVal) : null;
-
+    const categoria = document.getElementById('categoria').value;
+    const nivel = document.getElementById('nivel').value;
+    const repeticoes = document.getElementById('repeticoes').value.replace(/\D/g, '') || null;
+    const series = document.getElementById('series').value.replace(/\D/g, '') || null;
+    const tempo = document.getElementById('tempo-admin').value.replace(/\D/g, '');
     return {
         nome,
         explicacao,

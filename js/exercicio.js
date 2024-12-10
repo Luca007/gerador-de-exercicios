@@ -466,7 +466,7 @@ function editarExercicio(exercise) {
   applyInputMasks();
 
   // Adicionar eventos após elementos existirem no DOM
-  $('#tempo-admin').on('input', updateFieldRequirements);
+  document.getElementById('tempo-admin').addEventListener('input', updateFieldRequirements);
 
   // Atualizar a obrigatoriedade inicial
   updateFieldRequirements();

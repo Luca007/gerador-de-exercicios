@@ -9,8 +9,4 @@ import './treino.js';
 import { applyInputMasks } from './utils.js';
 
 // Aplicar máscaras de entrada e inicializar seleções ao carregar o documento
-$(document).ready(function () {
-  // Aplicar máscaras de entrada
-  applyInputMasks();
-});
-
+applyInputMasks();

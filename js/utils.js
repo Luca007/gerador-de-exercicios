@@ -106,53 +106,36 @@ export function removeExistingSections() {
 
 // Função para aplicar máscaras de entrada usando Inputmask e jQuery
 export function applyInputMasks() {
-  // Máscara para o campo 'Tempo (segundos)' no formulário de administração
-  if ($('#tempo-admin').length) {
-    $('#tempo-admin').inputmask('integer', {
-      rightAlign: false,
-      placeholder: '',
-      allowMinus: false,
-      allowPlus: false,
-      min: 0,
-      max: 9999
-    });
-  }
-
-  // Máscara para o campo 'Tempo disponível' do formulário principal
-  if ($('#tempo-disponivel').length) {
-    $('#tempo-disponivel').inputmask('integer', {
-      rightAlign: false,
-      placeholder: '',
-      showMaskOnHover: false,
-      showMaskOnFocus: false,
-      allowMinus: false,
-      allowPlus: false,
-      min: 1,
-      max: 9999
-    });
-  }
-
-  // Máscara para o campo 'Repetições' no formulário de administração
-  if ($('#repeticoes').length) {
-    $('#repeticoes').inputmask('integer', {
-      rightAlign: false,
-      placeholder: '',
-      allowMinus: false,
-      allowPlus: false,
-      min: 1,
-      max: 9999
-    });
-  }
-
-  // Máscara para o campo 'Séries' no formulário de administração
-  if ($('#series').length) {
-    $('#series').inputmask('integer', {
-      rightAlign: false,
-      placeholder: '',
-      allowMinus: false,
-      allowPlus: false,
-      min: 1,
-      max: 9999
-    });
-  }
+  // Aplica a máscara para multiplos campos mudando a quantidade de dígitos de cada um de forma otimizada
+  const inputSettings = {
+      'tempo-disponivel': 4,
+      'tempo-admin': 4,
+      'repeticoes': 3,
+      'series': 3
+  };
+  
+  Object.entries(inputSettings).forEach(([id, maxLength]) => {
+      const inputField = document.getElementById(id);
+      
+      if (inputField) {
+          inputField.addEventListener('input', function () {
+              let value = this.value.replace(/\D/g, ''); // Remove os caracteres não numéricos
+          
+              if (value.length > maxLength) {
+                  value = value.slice(0, maxLength); // Limite para máximo de digitos
+              }
+          
+              let num = parseInt(value, 10) || 0;
+          
+              const maxVal = Math.pow(10, maxLength) - 1;
+              if (num > maxVal) {
+                  value = `${maxVal}`; // Valor máximo baseado no número máximo de dígitos
+              } else if (num < 0) {
+                  value = '0'; // Valor mínimo
+              }
+          
+              this.value = value;
+          });
+      }
+  });
 }
