@@ -8,11 +8,10 @@ import {
 import { adicionarExercicio } from './firestore.js';
 import { criarFormulario } from './formGenerator.js';
 import { construirMensagem } from './formUtils.js';
-import {
-  signInWithEmailAndPassword,
-  signOut,
-} from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js';
-import { adicionarBotaoGerenciarExercicios } from './exercicio.js';
+import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js';
+import { handleLogout } from './logout.js';
+import { createNavBar, attachNavEvents } from './navBar.js';
+import { adicionarBotaoGerenciarExercicios, criarGerenciamentoExercicios } from './exercicio.js';
 import {
   setupCheckboxGroupLogic,
   handleAllSelected,
@@ -29,7 +28,7 @@ adminButton.addEventListener('click', () => {
 });
 
 // Função para criar o formulário de login
-function createLoginForm() {
+export function createLoginForm() {
   // Remover instâncias anteriores
   removeExistingSections();
 
@@ -228,6 +227,16 @@ function setupFormEvents(form) {
         form.reset();
         // Mostrar a interface de administrador
         createAdminInterface();
+        // Mostra a barra de navegação
+        createNavBar();
+
+        // Anexar eventos da navbar
+        attachNavEvents({
+          createAdminInterface,
+          criarGerenciamentoExercicios,
+          handleLogout
+        });
+
         exibirAlerta('sucesso', 'Bem-vindo!');
       })
       .catch((error) => {
@@ -447,24 +456,6 @@ async function handleFormSubmit(e) {
     loader.style.display = 'none';
     document.body.classList.remove('no-scroll');
   }
-}
-
-// Função para manipular o logout
-function handleLogout() {
-  signOut(auth)
-    .then(() => {
-      // Logout bem-sucedido
-      const adminSection = document.getElementById('admin-section');
-      if (adminSection) {
-        adminSection.remove(); // Remover a interface de administração
-      }
-      exibirAlerta('sucesso', 'Logout realizado com sucesso.');
-      console.log('Usuário desconectado');
-    })
-    .catch((error) => {
-      exibirAlerta('erro', 'Erro ao desconectar.');
-      console.error('Erro ao desconectar:', error);
-    });
 }
 
 // Função para validar os dados do formulário
