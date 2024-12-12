@@ -182,8 +182,6 @@
     stroke: red;
     stroke-width: 4;
     stroke-linecap: round;
-    /* Ajustamos o dasharray para suportar o comprimento maior (20,20 a 50,50 ~42.4px) */
-    /* Escolhemos 100 para ter sobra. */
     stroke-dasharray: 100;
     stroke-dashoffset: 100; 
 }
@@ -225,9 +223,11 @@
     }
     .item-hints .hint:hover .hint-content {
         padding: 25px 15px 30px 15px;
+        visibility: hidden;
     }
     .item-hints .hint-content::after {
         -webkit-transform: rotate(225deg);
         transform: rotate(225deg);
+        display: none;
     }
 }
