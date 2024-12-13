@@ -1,7 +1,8 @@
-import { createAdminInterface, createLoginForm } from './admin.js';
+import { createAdminInterface } from './admin.js';
 import { criarGerenciamentoExercicios } from './exercicio.js';
 import { removeExistingSections, loader } from './utils.js';
 import { handleLogout } from './logout.js';
+import { createLoginForm } from './createLogin.js';
 
 export function createNavBar() {
     // Verifica se a navbar já existe para não duplicar
