@@ -93,17 +93,21 @@ Com base nas seleções, o site gera um treino personalizado, dividindo o tempo 
 - `loginForm.css`: Estilos para o formulário de login da área de administração.
 - `buttonGenerate.css`, `buttonEdit.css`, `buttonDelete.css`: Estilos para botões personalizados.
 - `checkbox.css`, `select.css`, `inputTime.css`: Estilos para elementos de formulário personalizados.
+- `navBar.css`: Estilo para a barra de navegação da sessão de administrador.
 - **Arquivos JavaScript:**
-- `main.js`: Arquivo principal que importa os demais módulos JavaScript.
-- `firebase.js`: Configuração e inicialização do Firebase.
-- `auth.js`: Gerenciamento do estado de autenticação do usuário.
 - `admin.js`: Lógica da interface de administração e formulário de login.
+- `auth.js`: Gerenciamento do estado de autenticação do usuário.
+- `createLogin.js`: Funções para criação e tratamento do login de administrador.
 - `exercicio.js`: Gerencia a interface e operações relacionadas aos exercícios.
+- `firebase.js`: Configuração e inicialização do Firebase.
+- `firestore.js`: Funções para interação com o Firestore, como obter, adicionar, atualizar e deletar exercícios.
+- `formGenerator.js`: Funções para criação dinâmica de formulários.
+- `formUtils.js`: Funções auxiliares para validação e construção de mensagens de alerta.
+- `logout.js`: Função para tratar do logout do administrador.
+- `main.js`: Arquivo principal que importa os demais módulos JavaScript.
+- `navBar.js`: Funções que criam e gerenciam a barra de navegação.
 - `treino.js`: Contém a lógica para gerar e exibir os treinos personalizados.
 - `utils.js`: Funções utilitárias usadas em todo o projeto, como máscaras de entrada e exibição de alertas.
-- `firestore.js`: Funções para interação com o Firestore, como obter, adicionar, atualizar e deletar exercícios.
-- `formUtils.js`: Funções auxiliares para validação e construção de mensagens de alerta.
-- `formGenerator.js`: Funções para criação dinâmica de formulários.
 
 ## Como Configurar Localmente
 
