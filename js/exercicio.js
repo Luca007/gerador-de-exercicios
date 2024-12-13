@@ -1,18 +1,9 @@
 import { exibirAlerta, removeExistingSections, applyInputMasks, loader } from './utils.js';
-import {
-  atualizarExercicio,
-  deletarExercicio as deletarExercicioFirestore,
-  obterExercicios
-} from './firestore.js';
+import { atualizarExercicio, deletarExercicio as deletarExercicioFirestore, obterExercicios } from './firestore.js';
 import { criarFormulario } from './formGenerator.js';
 import { createAdminInterface } from './admin.js';
 import { construirMensagem } from './formUtils.js';
-import {
-  setupCheckboxGroupLogic,
-  handleAllSelected,
-  updateFieldRequirements,
-  extractFormData
-} from './formUtils.js';
+import { setupCheckboxGroupLogic, handleAllSelected, updateFieldRequirements, extractFormData, validateFormData } from './formUtils.js';
 
 // Função para criar o gerenciamento de exercícios
 export function criarGerenciamentoExercicios() {
@@ -377,11 +368,9 @@ async function excluirExercicio(exerciseId) {
 }
 
 // Função para editar exercício
-function editarExercicio(exercise) {
-  // Remover seções existentes
+async function editarExercicio(exercise) {
   removeExistingSections();
 
-  // Criar formulário para editar exercício
   const editSection = document.createElement('div');
   editSection.id = 'edit-section';
   editSection.className = 'container mt-5';
@@ -390,7 +379,6 @@ function editarExercicio(exercise) {
   h2.innerText = 'Editar Exercício';
   h2.className = 'text-center mb-4';
 
-  // Campos para editar exercício
   const fields = [
     { label: 'Nome do Exercício:', id: 'nome', type: 'text', required: true },
     { label: 'Explicação:', id: 'explicacao', type: 'textarea', required: true },
@@ -452,46 +440,48 @@ function editarExercicio(exercise) {
   adminMessage.className = 'mt-3';
 
   const backButton = document.createElement('button');
-  backButton.type = 'button'; // Evita comportamento de submissão
+  backButton.type = 'button';
   backButton.innerText = 'Voltar';
   backButton.className = 'btn btn-secondary btn-block mt-3';
   backButton.addEventListener('click', () => {
     criarGerenciamentoExercicios();
   });
 
-  // Montar a estrutura
   editSection.appendChild(h2);
   editSection.appendChild(form);
   editSection.appendChild(backButton);
   editSection.appendChild(adminMessage);
 
-  // Adicionar ao body
   document.body.appendChild(editSection);
 
-  // Aplicar máscaras de entrada
   applyInputMasks();
 
-  // Adicionar eventos após elementos existirem no DOM
   document.getElementById('tempo-admin').addEventListener('input', updateFieldRequirements);
 
-  // Atualizar a obrigatoriedade inicial
   updateFieldRequirements();
 
-  // Configurar a lógica dos grupos de checkboxes
   setupCheckboxGroupLogic('impulso');
   setupCheckboxGroupLogic('etaria');
 
-  // Manipulador de submissão do formulário
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const formData = extractFormData();
 
-    if (!validateFormData(formData)) {
+    // Campos obrigatórios para edição
+    const camposObrigatoriosEdicao = [
+      { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
+      { campo: 'explicacao', nomeExibicao: 'Explicação' },
+      { campo: 'impulsoSelectedOptions', nomeExibicao: 'Equipamento' },
+      { campo: 'categoriaEtariaSelectedOptions', nomeExibicao: 'Categoria Etária' },
+      { campo: 'categoria', nomeExibicao: 'Categoria' },
+      { campo: 'nivel', nomeExibicao: 'Nível' }
+    ];
+
+    if (!validateFormData(formData, camposObrigatoriosEdicao)) {
       return;
     }
 
-    // Obter todas as opções disponíveis para impulso e categoria etária
     const impulsoOptions = [
       ...document.querySelectorAll(`input[name="impulso"]`)
     ].map((cb) => cb.value);
@@ -499,7 +489,6 @@ function editarExercicio(exercise) {
       ...document.querySelectorAll(`input[name="etaria"]`)
     ].map((cb) => cb.value);
 
-    // Tratar seleção de todas as opções
     const impulso = handleAllSelected(
       formData.impulsoSelectedOptions,
       impulsoOptions,
@@ -511,7 +500,6 @@ function editarExercicio(exercise) {
       'todos'
     );
 
-    // Mostrar o loader
     loader.style.display = 'flex';
     document.body.classList.add('no-scroll');
 
@@ -529,10 +517,8 @@ function editarExercicio(exercise) {
       });
       exibirAlerta('sucesso', 'Exercício atualizado com sucesso!');
 
-      // Retornar à lista de exercícios após atualização
       setTimeout(() => {
         criarGerenciamentoExercicios();
-        // Esconder o loader após os 20 ms
         loader.style.display = 'none';
         document.body.classList.remove('no-scroll');
       }, 20);
@@ -540,62 +526,14 @@ function editarExercicio(exercise) {
       console.error('Erro ao atualizar exercício:', error);
       exibirAlerta('erro', 'Erro ao atualizar exercício.');
 
-      // Esconder o loader
       loader.style.display = 'none';
       document.body.classList.remove('no-scroll');
     }
 
-    // Limpar a mensagem após algum tempo
     setTimeout(() => {
       adminMessage.innerHTML = '';
     }, 3000);
   });
-
-  // Função para validar os dados do formulário
-  function validateFormData(formData) {
-    // Lista de campos obrigatórios
-    const camposObrigatorios = [
-      { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
-      { campo: 'explicacao', nomeExibicao: 'Explicação' },
-      { campo: 'impulsoSelectedOptions', nomeExibicao: 'Equipamento' },
-      { campo: 'categoriaEtariaSelectedOptions', nomeExibicao: 'Categoria Etária' },
-      { campo: 'categoria', nomeExibicao: 'Categoria' },
-      { campo: 'nivel', nomeExibicao: 'Nível' }
-    ];
-
-    // Se 'tempo' não estiver preenchido, 'repeticoes' e 'series' são obrigatórios
-    if (!formData.tempo) {
-      camposObrigatorios.push(
-        { campo: 'repeticoes', nomeExibicao: 'Repetições' },
-        { campo: 'series', nomeExibicao: 'Séries' }
-      );
-    }
-
-    // Verificar quais campos estão faltando
-    const camposFaltantes = camposObrigatorios
-      .filter(({ campo }) => isCampoFaltante(formData[campo]))
-      .map(({ nomeExibicao }) => nomeExibicao);
-
-    // Se houver campos faltantes, exibir alerta
-    if (camposFaltantes.length > 0) {
-      const mensagem = construirMensagem(camposFaltantes);
-      exibirAlerta('aviso', mensagem);
-      return false;
-    }
-
-    return true;
-  }
-
-  // Função para verificar se o campo está faltando
-  function isCampoFaltante(valor) {
-    return (
-      valor === undefined ||
-      valor === null ||
-      (typeof valor === 'string' && valor.trim() === '') ||
-      (Array.isArray(valor) && valor.length === 0)
-    );
-  }
-
 }
 
 export function adicionarBotaoGerenciarExercicios() {

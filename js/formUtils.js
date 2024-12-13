@@ -1,3 +1,5 @@
+import { exibirAlerta } from './utils.js';
+
 // Função para construir a mensagem de alerta baseada nos campos faltantes
 export function construirMensagem(camposFaltantes) {
     const essenciais = ['Repetições', 'Séries', 'Tempo'];
@@ -191,3 +193,40 @@ export function extractFormData() {
         tempo,
     };
 }
+
+// Função genérica para verificar se um campo está faltando
+export function isCampoFaltante(valor) {
+    return (
+      valor === undefined ||
+      valor === null ||
+      (typeof valor === 'string' && valor.trim() === '') ||
+      (Array.isArray(valor) && valor.length === 0)
+    );
+}
+  
+// Função genérica para validar dados do formulário
+// Recebe o formData e uma lista de campos obrigatórios.
+// Também recebe a lógica de obrigatoriedade adicional se 'tempo' não estiver preenchido.
+export function validateFormData(formData, camposObrigatoriosBase) {
+    // Copiamos a lógica de verificar se tempo não existe e então adicionar repeticoes e series
+    const camposObrigatorios = [...camposObrigatoriosBase];
+  
+    if (!formData.tempo) {
+      camposObrigatorios.push(
+        { campo: 'repeticoes', nomeExibicao: 'Repetições' },
+        { campo: 'series', nomeExibicao: 'Séries' }
+      );
+    }
+  
+    const camposFaltantes = camposObrigatorios
+      .filter(({ campo }) => isCampoFaltante(formData[campo]))
+      .map(({ nomeExibicao }) => nomeExibicao);
+  
+    if (camposFaltantes.length > 0) {
+      const mensagem = construirMensagem(camposFaltantes);
+      exibirAlerta('aviso', mensagem);
+      return false;
+    }
+    return true;
+}
+  

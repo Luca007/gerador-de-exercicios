@@ -1,7 +1,7 @@
 import { exibirAlerta, removeExistingSections, applyInputMasks, loader } from './utils.js';
 import { adicionarExercicio } from './firestore.js';
 import { criarFormulario } from './formGenerator.js';
-import { construirMensagem } from './formUtils.js';
+import { validateFormData } from './formUtils.js';
 import { handleLogout } from './logout.js';
 import { adicionarBotaoGerenciarExercicios } from './exercicio.js';
 import { setupCheckboxGroupLogic, handleAllSelected, updateFieldRequirements, extractFormData } from './formUtils.js';
@@ -139,7 +139,17 @@ async function handleFormSubmit(e) {
   const form = e.target;
   const formData = extractFormData();
 
-  if (!validateFormData(formData)) {
+  // Campos obrigatórios para a página de admin
+  const camposObrigatoriosAdmin = [
+    { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
+    { campo: 'explicacao', nomeExibicao: 'Explicação' },
+    { campo: 'impulsoSelectedOptions', nomeExibicao: 'Equipamento' },
+    { campo: 'categoriaEtariaSelectedOptions', nomeExibicao: 'Categoria Etária' },
+    { campo: 'categoria', nomeExibicao: 'Categoria' },
+    { campo: 'nivel', nomeExibicao: 'Nível' }
+  ];
+
+  if (!validateFormData(formData, camposObrigatoriosAdmin)) {
     return;
   }
 
@@ -198,51 +208,3 @@ async function handleFormSubmit(e) {
   }
 }
 
-// Função para validar os dados do formulário
-function validateFormData(formData) {
-  // Lista de campos obrigatórios
-  const camposObrigatorios = [
-    { campo: 'nome', nomeExibicao: 'Nome do Exercício' },
-    { campo: 'explicacao', nomeExibicao: 'Explicação' },
-    {
-      campo: 'impulsoSelectedOptions',
-      nomeExibicao: 'Equipamento',
-    },
-    {
-      campo: 'categoriaEtariaSelectedOptions',
-      nomeExibicao: 'Categoria Etária',
-    },
-    { campo: 'categoria', nomeExibicao: 'Categoria' },
-    { campo: 'nivel', nomeExibicao: 'Nível' },
-  ];
-
-  // Se 'tempo' não estiver preenchido, 'repeticoes' e 'series' são obrigatórios
-  if (!formData.tempo) {
-    camposObrigatorios.push(
-      { campo: 'repeticoes', nomeExibicao: 'Repetições' },
-      { campo: 'series', nomeExibicao: 'Séries' }
-    );
-  }
-
-  // Verificar quais campos estão faltando
-  const camposFaltantes = camposObrigatorios
-    .filter(({ campo }) => {
-      const valor = formData[campo];
-      return (
-        valor === undefined ||
-        valor === null ||
-        (typeof valor === 'string' && valor.trim() === '') ||
-        (Array.isArray(valor) && valor.length === 0)
-      );
-    })
-    .map(({ nomeExibicao }) => nomeExibicao);
-
-  // Se houver campos faltantes, exibir alerta
-  if (camposFaltantes.length > 0) {
-    const mensagem = construirMensagem(camposFaltantes);
-    exibirAlerta('aviso', mensagem);
-    return false;
-  }
-
-  return true;
-}
