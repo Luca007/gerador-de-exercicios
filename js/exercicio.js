@@ -2,7 +2,6 @@ import { exibirAlerta, removeExistingSections, applyInputMasks, loader } from '.
 import { atualizarExercicio, deletarExercicio as deletarExercicioFirestore, obterExercicios } from './firestore.js';
 import { criarFormulario } from './formGenerator.js';
 import { createAdminInterface } from './admin.js';
-import { construirMensagem } from './formUtils.js';
 import { setupCheckboxGroupLogic, handleAllSelected, updateFieldRequirements, extractFormData, validateFormData } from './formUtils.js';
 
 // Função para criar o gerenciamento de exercícios

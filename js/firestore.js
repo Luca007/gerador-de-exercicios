@@ -1,14 +1,5 @@
 import { db } from './firebase.js';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  doc,
-  updateDoc,
-  deleteDoc
-} from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js';
+import { collection, query, where, getDocs, addDoc, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js';
 
 // Função para obter exercícios com filtros
 export async function obterExercicios({ categoria } = {}) {
