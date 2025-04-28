@@ -8,6 +8,8 @@ Você pode acessar o projeto através do link:
 
 [https://luca007.github.io/gerador-de-exercicios/](https://luca007.github.io/gerador-de-exercicios/)
 
+Demo: https://luca007.github.io/gerador-de-exercicios/
+
 ## Sumário
 
 - [Descrição](#descrição)
